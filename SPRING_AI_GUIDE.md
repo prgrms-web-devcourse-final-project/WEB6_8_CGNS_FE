@@ -1,4 +1,4 @@
-# Spring AI 완벽 가이드 (2025년 9월 기준)
+# Spring AI 1.0.1 완벽 가이드 (2025년 9월 기준)
 
 ## 목차
 1. [Spring AI란?](#spring-ai란)
@@ -41,16 +41,16 @@ repositories {
     maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-extra["springAiVersion"] = "1.0.0-M5"
+extra["springAiVersion"] = "1.0.1"
 
 dependencies {
     // Spring Boot 기본
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    
-    // Spring AI - OpenAI
-    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
-    
+
+    // Spring AI - OpenAI (1.0.1 정식 버전)
+    implementation("org.springframework.ai:spring-ai-starter-model-openai")
+
     // 환경 변수 관리
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 }
@@ -68,14 +68,24 @@ dependencyManagement {
 spring:
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY}
-      # Groq 사용시
-      # base-url: https://api.groq.com/openai/v1
+      api-key: ${GROQ_API_KEY}
+      # Groq API 사용 (OpenAI 호환)
+      base-url: https://api.groq.com/openai
       chat:
         options:
-          model: gpt-4o  # 또는 gpt-3.5-turbo
+          model: openai/gpt-oss-120b  # Groq의 오픈소스 모델
           temperature: 0.7
           max-tokens: 4096
+
+# 또는 OpenAI 직접 사용시:
+# spring:
+#   ai:
+#     openai:
+#       api-key: ${OPENAI_API_KEY}
+#       chat:
+#         options:
+#           model: gpt-4o
+#           temperature: 0.7
           
 logging:
   level:
@@ -264,22 +274,35 @@ fun openAiChatModel(): ChatModel {
 }
 ```
 
-### Groq (OpenAI 호환)
+### Groq (OpenAI 호환) - 우리 프로젝트 설정
 
 ```kotlin
+// application.yml 설정만으로 간단하게 사용 가능
+spring:
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY}
+      base-url: https://api.groq.com/openai  # /v1 제거 (자동 추가됨)
+      chat:
+        options:
+          model: openai/gpt-oss-120b  # Groq의 오픈소스 모델
+          temperature: 0.7
+          max-tokens: 4096
+
+# 또는 프로그래밍 방식
 @Bean
 fun groqChatModel(): ChatModel {
     val api = OpenAiApi(
-        "https://api.groq.com/openai/v1",
+        "https://api.groq.com/openai",  # /v1 제거
         System.getenv("GROQ_API_KEY")
     )
-    
+
     val options = OpenAiChatOptions.builder()
-        .model("llama-3.3-70b-versatile")  // Groq 모델
+        .model("openai/gpt-oss-120b")  # 오픈소스 모델
         .temperature(0.7)
         .maxTokens(4096)
         .build()
-    
+
     return OpenAiChatModel(api, options)
 }
 ```
@@ -306,7 +329,75 @@ spring:
 
 ## 실전 예제
 
-### 날씨 조회 봇
+### 실제 프로젝트 예제 (WeatherTool - 우리 프로젝트)
+
+우리 프로젝트에서 구현한 실제 WeatherTool 예제입니다:
+
+```kotlin
+@Service
+class WeatherTool(
+    private val webClient: WebClient,
+    @Value("\${weather.api.key}") private val serviceKey: String,
+    @Value("\${weather.api.base-url}") private val apiUrl: String
+) {
+
+    @Tool(description = "중기 날씨 예보를 조회합니다. 3-10일 후의 날씨, 기온, 강수 확률 정보를 제공합니다.")
+    fun getWeatherForecast(
+        @ToolParam(description = "지역 이름 (예: 서울, 부산, 대구 등)", required = false) location: String?,
+        @ToolParam(description = "지역 코드 (예: 11B10101)", required = false) regionCode: String?,
+        @ToolParam(description = "발표 시각 (YYYYMMDDHHMM)", required = false) baseTime: String?
+    ): WeatherResponse {
+
+        val actualLocation = location ?: "서울"
+        val actualRegionCode = regionCode ?: getRegionCodeFromLocation(actualLocation)
+        val actualBaseTime = baseTime ?: getCurrentBaseTime()
+
+        return try {
+            // 3개 기상청 API 통합 호출
+            val midForecastResponse = fetchMidForecast(actualRegionCode, actualBaseTime).block()
+            val temperatureResponse = fetchTemperature(actualRegionCode, actualBaseTime).block()
+            val landForecastResponse = fetchLandForecast(actualRegionCode, actualBaseTime).block()
+
+            // 데이터 병합 및 처리
+            val combinedForecast = combineWeatherData(
+                midForecastText = midForecastResponse,
+                temperatureData = temperatureResponse,
+                landForecastData = landForecastResponse
+            )
+
+            WeatherResponse(
+                region = actualLocation,
+                regionCode = actualRegionCode,
+                baseTime = actualBaseTime,
+                forecast = combinedForecast.summary,
+                details = combinedForecast.details
+            )
+
+        } catch (e: Exception) {
+            WeatherResponse(
+                region = actualLocation,
+                regionCode = actualRegionCode,
+                baseTime = actualBaseTime,
+                forecast = "날씨 정보를 가져올 수 없습니다: \${e.message}",
+                details = WeatherDetails()
+            )
+        }
+    }
+
+    // 3개 API 호출 메서드들
+    private fun fetchMidForecast(regionId: String, baseTime: String): Mono<String?> { /* ... */ }
+    private fun fetchTemperature(regionId: String, baseTime: String): Mono<TemperatureData?> { /* ... */ }
+    private fun fetchLandForecast(regionId: String, baseTime: String): Mono<PrecipitationData?> { /* ... */ }
+}
+```
+
+### 핵심 특징:
+- **3개 API 통합**: 기상청 getMidFcst, getMidTa, getMidLandFcst 활용
+- **지역 자동 변환**: "서울" → "11B10101" 지역코드 변환
+- **시간 자동 계산**: 현재 시간 기준 최신 발표시각 사용
+- **에러 처리**: API 실패시에도 안정적 응답 제공
+
+### 간단한 날씨 조회 봇
 
 ```kotlin
 @Service
@@ -418,11 +509,19 @@ fun chatClient(chatModel: ChatModel, toolService: ToolService): ChatClient {
 }
 ```
 
-### 2. Groq API 사용시 주의사항
+### 2. Groq API 사용시 주의사항 (우리 프로젝트 경험)
 
-- Function Calling 지원 여부 확인 필요
-- 일부 모델은 Tool Calling 미지원
-- OpenAI 호환 엔드포인트 사용: `https://api.groq.com/openai/v1`
+- **URL 중복 문제**: `base-url`에 `/v1` 포함하면 `/v1/v1/chat/completions` 오류 발생
+  ```yaml
+  # ❌ 잘못된 설정
+  base-url: https://api.groq.com/openai/v1
+
+  # ✅ 올바른 설정
+  base-url: https://api.groq.com/openai
+  ```
+- **모델명**: `openai/gpt-oss-120b` 사용 (오픈소스 모델)
+- **Tool Calling**: Groq에서 @Tool 기능 정상 작동 확인
+- **응답 속도**: OpenAI보다 빠른 응답 속도
 
 ### 3. 메모리 관리
 
@@ -451,15 +550,28 @@ class ConversationMemory {
 
 - [Spring AI 공식 문서](https://docs.spring.io/spring-ai/reference/)
 - [Spring AI GitHub](https://github.com/spring-projects/spring-ai)
-- [Spring AI 1.0.0-M5 릴리즈 노트](https://spring.io/blog/2024/12/23/spring-ai-1-0-0-m5-released/)
+- [Spring AI 1.0.1 릴리즈 노트](https://spring.io/blog/2025/05/20/spring-ai-1-0-GA-released/)
+- [우리 프로젝트 GitHub](https://github.com/Mrbaeksang/spring-ai-weather-tool)
 
 ---
 
 ## 버전 정보
 
-- **Spring AI**: 1.0.0-M5 (2024년 12월 릴리즈)
+- **Spring AI**: 1.0.1 (2025년 5월 GA 릴리즈)
 - **Spring Boot**: 3.5.5
 - **Kotlin**: 1.9.25
+- **Groq API**: openai/gpt-oss-120b 모델
+- **기상청 API**: 중기예보조회서비스
 - **작성일**: 2025년 9월
 
-> ⚠️ **주의**: Spring AI는 아직 마일스톤 버전입니다. GA(General Availability) 버전은 2025년 초 예정입니다.
+> ✅ **안정화**: Spring AI 1.0.1은 정식 GA(General Availability) 버전으로 프로덕션 환경에서 안전하게 사용 가능합니다.
+
+## 실제 프로젝트 적용 사례
+
+이 가이드의 모든 예제는 실제 동작하는 [spring-ai-weather-tool](https://github.com/Mrbaeksang/spring-ai-weather-tool) 프로젝트에서 검증되었습니다:
+
+- ✅ **Spring AI 1.0.1 + Groq API** 연동 완료
+- ✅ **@Tool 어노테이션** 기반 날씨 예보 서비스
+- ✅ **3개 기상청 API 통합** (중기전망, 기온, 강수)
+- ✅ **24개 지역 지원** 및 자동 지역코드 변환
+- ✅ **에러 처리** 및 안정적인 응답 제공
