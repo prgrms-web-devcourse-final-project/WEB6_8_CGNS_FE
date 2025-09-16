@@ -62,34 +62,78 @@ dependencyManagement {
 }
 ```
 
-### 2. application.yml 설정
+### 2. .env 파일 설정 (우리 프로젝트 방식)
+
+프로젝트 루트에 `.env` 파일 생성:
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
+WEATHER_API_KEY=your_weather_api_key_here
+```
+
+### 3. BackendApplication.kt - dotenv 로딩
+
+```kotlin
+import io.github.cdimascio.dotenv.dotenv
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+@SpringBootApplication
+class BackendApplication
+
+fun main(args: Array<String>) {
+    // .env 파일 로딩 (Spring보다 먼저 실행)
+    val dotenv = dotenv {
+        ignoreIfMissing = true
+        ignoreIfMalformed = true
+    }
+    dotenv.entries().forEach { entry ->
+        System.setProperty(entry.key, entry.value)
+    }
+
+    runApplication<BackendApplication>(*args)
+}
+```
+
+### 4. application.yml 설정
 
 ```yaml
 spring:
   ai:
     openai:
       api-key: ${GROQ_API_KEY}
-      # Groq API 사용 (OpenAI 호환)
-      base-url: https://api.groq.com/openai
+      base-url: https://api.groq.com/openai  # /v1 자동 추가됨
       chat:
         options:
-          model: openai/gpt-oss-120b  # Groq의 오픈소스 모델
+          model: openai/gpt-oss-120b
           temperature: 0.7
           max-tokens: 4096
 
-# 또는 OpenAI 직접 사용시:
-# spring:
-#   ai:
-#     openai:
-#       api-key: ${OPENAI_API_KEY}
-#       chat:
-#         options:
-#           model: gpt-4o
-#           temperature: 0.7
-          
+# 날씨 API 설정 (기상청)
+weather:
+  api:
+    key: ${WEATHER_API_KEY}
+    base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
+
 logging:
   level:
     org.springframework.ai: DEBUG
+```
+
+### 5. WebClientConfig.kt - HTTP 클라이언트 설정
+
+```kotlin
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.client.WebClient
+
+@Configuration
+class WebClientConfig {
+    @Bean
+    fun webClient(): WebClient {
+        return WebClient.builder().build()
+    }
+}
+```
 ```
 
 ---
@@ -134,7 +178,7 @@ class WeatherService {
 }
 ```
 
-### Tool 등록 및 사용
+### 6. AiConfig.kt - ChatClient 설정 (우리 프로젝트)
 
 ```kotlin
 import org.springframework.ai.chat.client.ChatClient
@@ -144,14 +188,12 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class AiConfig {
-    
+
     @Bean
-    fun chatClient(
-        chatModel: ChatModel,
-        weatherService: WeatherService  // @Tool이 있는 서비스 주입
-    ): ChatClient {
+    fun chatClient(chatModel: ChatModel, weatherTool: WeatherTool): ChatClient {
+        println("📌 Registering WeatherTool with @Tool methods")
         return ChatClient.builder(chatModel)
-            .defaultTools(weatherService)  // Tool 자동 감지 및 등록
+            .defaultTools(weatherTool)  // @Tool 어노테이션 자동 감지
             .build()
     }
 }
@@ -161,18 +203,55 @@ class AiConfig {
 
 ## ChatClient 사용법
 
-### 기본 사용
+### ChatController - 실제 엔드포인트 (우리 프로젝트)
 
 ```kotlin
+import org.springframework.ai.chat.client.ChatClient
+import org.springframework.web.bind.annotation.*
+
 @RestController
-class ChatController(private val chatClient: ChatClient) {
-    
+@CrossOrigin
+class ChatController(
+    private val chatClient: ChatClient,
+    private val weatherTool: WeatherTool
+) {
+
     @GetMapping("/chat")
     fun chat(@RequestParam message: String): String {
-        return chatClient.prompt()
-            .user(message)
-            .call()
-            .content() ?: "응답 없음"
+        println("🚀 사용자 메시지: $message")
+
+        return try {
+            val response = chatClient.prompt()
+                .user(message)
+                .call()
+                .content()
+
+            println("🤖 AI 응답: $response")
+            response ?: "응답을 받을 수 없습니다."
+        } catch (e: Exception) {
+            println("❌ 오류 발생: ${e.message}")
+            "오류가 발생했습니다: ${e.message}"
+        }
+    }
+
+    // 디버그용 날씨 API 직접 호출
+    @GetMapping("/weather/debug")
+    fun debugWeatherApi(
+        @RequestParam(defaultValue = "서울") location: String
+    ): Map<String, Any?> {
+        return try {
+            val response = weatherTool.getWeatherForecast(location, null, null)
+            mapOf(
+                "success" to true,
+                "location" to location,
+                "response" to response
+            )
+        } catch (e: Exception) {
+            mapOf(
+                "success" to false,
+                "error" to (e.message ?: "알 수 없는 오류")
+            )
+        }
     }
 }
 ```
@@ -323,6 +402,52 @@ spring:
         options:
           model: claude-3-opus-20240229
           max-tokens: 4096
+```
+
+---
+
+## 🚀 실행 및 테스트 방법
+
+### 1. API 키 발급
+
+#### Groq API 키 발급
+1. [Groq Console](https://console.groq.com/) 접속
+2. 계정 생성 후 로그인
+3. API Keys 메뉴에서 새 키 생성
+4. `gsk_...` 형태의 키 복사
+
+#### 기상청 API 키 발급
+1. [기상청 Open API](https://www.data.go.kr/data/15084084/openapi.do) 접속
+2. 중기예보조회서비스 신청
+3. 승인 후 서비스 키 발급 (1-2일 소요)
+
+### 2. 애플리케이션 실행
+
+```bash
+# 1. 프로젝트 클론
+git clone https://github.com/Mrbaeksang/spring-ai-weather-tool.git
+cd spring-ai-weather-tool
+
+# 2. .env 파일 생성
+echo "GROQ_API_KEY=your_groq_key_here" > .env
+echo "WEATHER_API_KEY=your_weather_key_here" >> .env
+
+# 3. 빌드 및 실행
+./gradlew bootRun
+```
+
+### 3. 테스트
+
+#### 브라우저 테스트
+```
+http://localhost:8080/chat?message=서울 날씨 어때?
+http://localhost:8080/chat?message=부산 3일 후 날씨는?
+http://localhost:8080/weather/debug?location=제주
+```
+
+#### 예상 응답
+```
+AI 응답: "서울 3일 후 날씨는 맑을 예정이고, 기온은 15-25도, 강수확률은 오전 20% 오후 30%입니다."
 ```
 
 ---
