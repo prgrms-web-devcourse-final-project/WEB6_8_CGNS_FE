@@ -1,290 +1,311 @@
-# 🌤️ Spring AI WeatherTool
+# 🇰🇷 한국 여행 가이드 챗봇
 
-Spring AI 1.0.1과 Groq API를 활용한 AI 기반 날씨 예보 서비스
+Spring AI 기반 한국 여행 정보 제공 챗봇 서비스 - OAuth 로그인, 날씨/관광 정보 AI 응답
 
 ## 📋 프로젝트 개요
 
-이 프로젝트는 Spring AI의 `@Tool` 어노테이션을 사용하여 AI가 자동으로 호출할 수 있는 날씨 도구를 구현합니다. 기상청 API 3개를 통합하여 종합적인 중기 날씨 예보를 제공합니다.
+Spring AI 1.0.1과 Groq API를 활용하여 한국 여행에 필요한 정보를 AI가 자동으로 제공하는 챗봇 서비스입니다.
+사용자는 OAuth 로그인 후 자연어로 질문하면, AI가 필요에 따라 기상청/관광청 API를 호출하여 답변합니다.
 
 ### 🎯 주요 기능
 
-- **🤖 AI 자동 호출**: Spring AI `@Tool` 어노테이션으로 AI가 필요시 자동 호출
-- **🌐 3개 API 통합**: 기상청 중기예보 API 3개를 통합하여 종합적인 정보 제공
-- **📍 지역 자동 인식**: 자연어에서 지역명을 추출하여 해당 지역 날씨 조회
-- **📅 3-10일 예보**: 중기 날씨 예보 (3일 후부터 10일 후까지)
-- **🌡️ 상세 기온 정보**: 최저/최고 기온 및 기온 범위 제공
-- **🌧️ 강수 정보**: 오전/오후 강수확률 및 날씨 상태
+- **🔐 OAuth 로그인**: Google/Kakao/Naver 소셜 로그인
+- **💬 채팅 세션 관리**: 대화별 세션 분리 및 기록 저장
+- **🤖 AI 자동 도구 호출**: Spring AI `@Tool`로 필요시 자동 API 호출
+- **🌤️ 날씨 정보**: 기상청 API 통합 - 중기예보 (4~10일 후)
+- **🏛️ 관광 정보**: 관광청 API - 관광지, 축제, 숙박 정보 (예정)
+- **📱 실시간 응답**: 한 번에 완성된 응답 제공
 
-## 🏗️ 프로젝트 구조
+## 🏗️ 프로젝트 구조 (DDD)
 
 ```
-backend/
-├── src/main/kotlin/com/back/
-│   ├── application/
-│   │   └── BackendApplication.kt          # 메인 애플리케이션 (dotenv 설정)
-│   ├── config/
-│   │   ├── AiConfig.kt                    # Spring AI ChatClient 설정
-│   │   ├── SecurityConfig.kt              # Spring Security 비활성화
-│   │   └── WebClientConfig.kt             # WebClient Bean 설정
-│   ├── controller/
-│   │   └── ChatController.kt              # REST API 엔드포인트
-│   └── tool/
-│       └── WeatherTool.kt                 # 핵심 날씨 툴 (@Tool 어노테이션)
-├── src/main/resources/
-│   └── application.yml                    # 애플리케이션 설정 (Groq API, 기상청 API)
-├── build.gradle.kts                       # Gradle 빌드 설정
-├── .env                                   # 환경변수 (API 키들)
-└── README.md                              # 프로젝트 문서
+src/main/kotlin/com/back/koreaTravelGuide/
+├── application/                          # 애플리케이션 계층
+│   └── KoreaTravelGuideApplication.kt    # 메인 앱 + 환경변수 로딩
+│
+├── domain/                               # 도메인 계층
+│   ├── chat/                            # 채팅 도메인
+│   │   ├── controller/ChatController.kt  # 채팅 API
+│   │   ├── service/ChatService.kt       # 채팅 비즈니스 로직
+│   │   ├── dto/                         # 요청/응답 DTO
+│   │   ├── entity/                      # 채팅 엔티티
+│   │   ├── repository/                  # 채팅 데이터 접근
+│   │   └── tool/WeatherTool.kt          # AI 호출 가능 도구들
+│   │
+│   ├── weather/                         # 날씨 도메인
+│   │   ├── service/
+│   │   │   ├── WeatherService.kt        # 캐싱 레이어 (12시간)
+│   │   │   └── WeatherServiceCore.kt    # 비즈니스 로직
+│   │   ├── client/WeatherApiClient.kt   # 기상청 API 클라이언트
+│   │   ├── dto/                         # 날씨 응답 구조체
+│   │   └── cache/                       # 캐시 설정 (예정)
+│   │
+│   ├── tour/                            # 관광 도메인 (예정)
+│   │   ├── service/
+│   │   │   ├── TourService.kt           # 캐싱 레이어
+│   │   │   └── TourServiceCore.kt       # 비즈니스 로직
+│   │   ├── client/TourApiClient.kt      # 관광청 API 클라이언트
+│   │   └── dto/                         # 관광 응답 구조체
+│   │
+│   └── user/                            # 사용자 도메인 (예정)
+│       ├── controller/UserController.kt # 사용자 API
+│       ├── service/UserService.kt       # 사용자 관리
+│       ├── entity/User.kt               # 사용자 엔티티
+│       └── repository/                  # 사용자 데이터 접근
+│
+├── infrastructure/                      # 인프라 계층
+│   └── config/
+│       ├── AiConfig.kt                  # Spring AI + Tool 등록
+│       ├── RestTemplateConfig.kt        # HTTP 클라이언트
+│       └── SecurityConfig.kt            # 보안 설정
+│
+└── common/                              # 공통 모듈
+    ├── ApiResponse.kt                   # 통일된 응답 포맷
+    └── exception/
+        └── GlobalExceptionHandler.kt    # 전역 예외 처리
 ```
 
-## 🔧 기술 스택
+## 🛠️ 기술 스택
 
-### Core Framework
-- **Spring Boot 3.5.5**: 메인 프레임워크
-- **Spring AI 1.0.1**: AI 통합 및 Tool 기능
-- **Spring WebFlux**: 비동기 HTTP 클라이언트
-- **Kotlin 1.9.25**: 개발 언어
+- **Framework**: Spring Boot 3.5.5, Kotlin 1.9.25
+- **AI**: Spring AI 1.0.1 + Groq API (openai/gpt-oss-120b)
+- **Database**: H2 (개발), JPA + Hibernate
+- **Authentication**: Spring Security + OAuth2
+- **HTTP Client**: RestTemplate
+- **Documentation**: OpenAPI 3.0.3 + Swagger UI
+- **Environment**: dotenv-kotlin
 
-### AI & API Integration
-- **Groq API**: AI 모델 (openai/gpt-oss-120b)
-- **기상청 Open API**: 날씨 데이터 소스
-- **Jackson XML**: XML 파싱
+## 🚀 빠른 시작
 
-### Development Tools
-- **dotenv-kotlin**: 환경변수 관리
-- **Gradle**: 빌드 도구
+### 1. 환경 변수 설정
 
-## 📡 API 통합 구조
-
-### 기상청 API 3개 통합
-
-```mermaid
-graph TD
-    A[WeatherTool] --> B[getMidFcst]
-    A --> C[getMidTa]
-    A --> D[getMidLandFcst]
-
-    B --> E[중기전망<br/>텍스트 예보]
-    C --> F[기온정보<br/>최저/최고, 범위]
-    D --> G[강수정보<br/>확률, 날씨상태]
-
-    E --> H[통합 응답]
-    F --> H
-    G --> H
-```
-
-#### 1. getMidFcst (중기전망조회)
-- **용도**: 기상청 공식 중기 전망 텍스트
-- **데이터**: 일반인이 읽기 쉬운 날씨 설명
-- **예시**: "맑은 날씨가 이어질 전망입니다"
-
-#### 2. getMidTa (중기기온조회)
-- **용도**: 3-10일 후 상세 기온 정보
-- **데이터**: 최저/최고 기온, 기온 범위
-- **예시**: 최저 15℃, 최고 25℃, 범위 13~17℃
-
-#### 3. getMidLandFcst (중기육상예보조회)
-- **용도**: 3-10일 후 강수 확률과 날씨 상태
-- **데이터**: 오전/오후 강수확률, 날씨 상태
-- **예시**: 오전 20%, 오후 30%, 맑음→구름많음
-
-## 🚀 실행 방법
-
-### 1. 환경 설정
-
-`.env` 파일을 프로젝트 루트에 생성:
-
-```env
+`.env` 파일 생성:
+```bash
+# AI API
 GROQ_API_KEY=your_groq_api_key_here
+
+# 기상청 API
 WEATHER_API_KEY=your_weather_api_key_here
+
+# OAuth (예정)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-### 2. API 키 발급
-
-#### Groq API 키
-1. [Groq Console](https://console.groq.com/) 접속
-2. API Key 생성
-3. `openai/gpt-oss-120b` 모델 사용 가능 확인
-
-#### 기상청 API 키
-1. [기상청 Open API](https://www.data.go.kr/data/15084084/openapi.do) 접속
-2. 중기예보조회서비스 신청
-3. 서비스 키 발급 (승인까지 1-2일 소요)
-
-### 3. 애플리케이션 실행
+### 2. 애플리케이션 실행
 
 ```bash
-# 1. 의존성 설치 및 빌드
-./gradlew build
+# 클론 및 의존성 설치
+git clone <repository-url>
+cd backend
 
-# 2. 애플리케이션 실행
+# 실행
 ./gradlew bootRun
 ```
 
-### 4. API 테스트
+### 3. API 확인
 
-#### 브라우저에서 테스트
-```
-http://localhost:8080/chat?message=서울 날씨 어때?
-http://localhost:8080/chat?message=부산 3일 후 날씨는?
-```
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+- **Health Check**: http://localhost:8080/ai?question=안녕하세요
 
-#### cURL로 테스트
-```bash
-curl "http://localhost:8080/chat?message=제주도 날씨 알려줘"
-```
+## 📡 주요 API 엔드포인트
 
-## 🎯 동작 흐름
-
-### 1. 사용자 요청
-```
-사용자: "서울 3일 후 날씨 어때?"
+### 🔐 사용자 관리
+```http
+POST /api/users/oauth/login    # OAuth 로그인
+POST /api/users/logout         # 로그아웃
+DELETE /api/users/withdrawal   # 회원탈퇴
+GET /api/users/profile         # 프로필 조회
 ```
 
-### 2. AI 분석 및 Tool 호출
-```mermaid
-sequenceDiagram
-    participant User as 사용자
-    participant AI as ChatClient (AI)
-    participant Tool as WeatherTool
-    participant APIs as 기상청 APIs
-
-    User->>AI: "서울 3일 후 날씨 어때?"
-    AI->>AI: 메시지 분석 ("날씨" 키워드 감지)
-    AI->>Tool: getWeatherForecast(location="서울")
-    Tool->>APIs: 3개 API 병렬 호출
-    APIs->>Tool: XML 응답들
-    Tool->>Tool: 데이터 파싱 및 통합
-    Tool->>AI: WeatherResponse 반환
-    AI->>User: "서울 3일 후는 맑음, 기온 15-25도..."
+### 💬 채팅 관리
+```http
+GET /api/chats/sessions                           # 채팅 세션 목록
+POST /api/chats/sessions                          # 새 세션 생성
+GET /api/chats/sessions/{sessionId}/messages      # 채팅 기록 조회
+POST /api/chats/sessions/{sessionId}/messages     # 메시지 전송 & AI 응답
 ```
 
-### 3. 데이터 처리 과정
-```
-지역명 변환: "서울" → "11B10101" (지역코드)
-발표시각 계산: 현재시간 → "202509161800" (최신 발표시각)
-↓
-3개 API 병렬 호출:
-├── 중기전망: "맑은 날씨가 이어질 전망"
-├── 기온정보: {day3: 15~25℃, day4: 16~26℃}
-└── 강수정보: {day3: 오전20% 오후30%}
-↓
-데이터 통합 및 포맷팅:
-"📋 기상 전망: 맑은 날씨가 이어질 전망
-📅 3일 후 (09/19): 🌡️ 15℃~25℃ 🌧️ 오전 20% 오후 30%"
-```
+## 🧩 주요 컴포넌트 사용법
 
-## 📊 데이터 구조
+### 1. ApiResponse 사용법
 
-### WeatherResponse (최종 응답)
+모든 API 응답은 `ApiResponse`로 감싸서 반환:
+
 ```kotlin
-data class WeatherResponse(
-    val region: String,          // "서울"
-    val regionCode: String,      // "11B10101"
-    val baseTime: String,        // "202509161800"
-    val forecast: String,        // 통합 텍스트 요약
-    val details: WeatherDetails  // 구조화된 상세 정보
-)
+@RestController
+class YourController {
+    @GetMapping("/test")
+    fun test(): ApiResponse<String> {
+        return ApiResponse("성공", "데이터")
+    }
+}
+
+// 응답 형태:
+// {
+//   "msg": "성공",
+//   "data": "데이터"
+// }
 ```
 
-### 응답 예시
-```json
-{
-  "region": "서울",
-  "regionCode": "11B10101",
-  "baseTime": "202509161800",
-  "forecast": "📋 기상 전망: 맑은 날씨가 이어질 전망입니다\n\n📅 3일 후 (09/19):\n  🌡️ 기온: 15℃~25℃\n  🌧️ 강수확률: 오전 20% 오후 30%\n  ☁️ 날씨: 오전 맑음 오후 구름많음",
-  "details": {
-    "day3": {
-      "date": "09/19",
-      "temperature": {
-        "minTemp": 15,
-        "maxTemp": 25,
-        "minTempRange": "13~17℃",
-        "maxTempRange": "23~27℃"
-      },
-      "precipitation": {
-        "amRainPercent": 20,
-        "pmRainPercent": 30,
-        "amWeather": "맑음",
-        "pmWeather": "구름많음"
-      }
+### 2. GlobalExceptionHandler 사용법
+
+예외를 던지기만 하면 자동으로 일관된 에러 응답:
+
+```kotlin
+@Service
+class YourService {
+    fun doSomething() {
+        // 400 Bad Request
+        throw IllegalArgumentException("잘못된 파라미터입니다")
+
+        // 404 Not Found
+        throw NoSuchElementException("데이터를 찾을 수 없습니다")
+
+        // 500 Internal Server Error (모든 예외)
+        throw RuntimeException("예상치 못한 오류")
     }
-  }
+}
+
+// 자동 응답:
+// {
+//   "msg": "잘못된 파라미터입니다"
+// }
+```
+
+### 3. AI Tool 추가 방법
+
+새로운 AI 도구 만들기:
+
+```kotlin
+// 1. Tool 클래스 생성
+@Service
+class TourTool(private val tourService: TourService) {
+
+    @Tool(description = "관광지 정보를 조회합니다")
+    fun getTourInfo(
+        @ToolParam(description = "지역 이름") location: String
+    ): TourResponse {
+        return tourService.getTourInfo(location)
+    }
+}
+
+// 2. AiConfig에 등록
+@Configuration
+class AiConfig {
+    @Bean
+    fun chatClient(chatModel: ChatModel, weatherTool: WeatherTool, tourTool: TourTool): ChatClient {
+        return ChatClient.builder(chatModel)
+            .defaultTools(weatherTool, tourTool)  // 여기에 추가
+            .build()
+    }
 }
 ```
 
-## 🌍 지원 지역
+### 4. 새 API 만들기
 
-### 24개 주요 도시
+RestTemplate 사용:
+
 ```kotlin
-"서울", "인천", "수원", "파주", "이천", "평택"     // 수도권
-"춘천", "원주", "강릉", "속초"                    // 강원도
-"대전", "세종", "청주", "충주"                    // 충청도
-"전주", "군산", "광주", "목포", "여수"            // 전라도
-"대구", "안동", "포항", "부산", "울산", "창원", "통영"  // 경상도
-"제주", "서귀포"                                // 제주도
+@Component
+class YourApiClient(private val restTemplate: RestTemplate) {
+
+    fun callExternalApi(): String? {
+        val url = "https://api.example.com/data"
+        return restTemplate.getForObject(url, String::class.java)
+    }
+}
 ```
 
-### 지역 매핑 시스템
-- 사용자 입력 → 지역코드 변환 → API 호출
-- 미등록 지역 입력시 서울로 기본 처리
-- 향후 추가 지역 확장 가능
+### 5. 캐싱 서비스 패턴
 
-## ⚙️ 설정 정보
+Weather/Tour와 동일한 패턴:
 
-### application.yml
-```yaml
-spring:
-  ai:
-    openai:
-      api-key: ${GROQ_API_KEY}
-      base-url: https://api.groq.com/openai
-      chat:
-        options:
-          model: openai/gpt-oss-120b
-          temperature: 0.7
-          max-tokens: 4096
+```kotlin
+// 캐싱 레이어
+@Service
+class YourService(private val yourServiceCore: YourServiceCore) {
+    private var cachedData: YourData? = null
+    private var cacheTime: LocalDateTime? = null
 
-weather:
-  api:
-    key: ${WEATHER_API_KEY}
-    base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
+    fun getData(): YourData {
+        if (shouldRefreshCache()) {
+            cachedData = yourServiceCore.fetchData()
+            cacheTime = LocalDateTime.now()
+        }
+        return cachedData!!
+    }
+
+    private fun shouldRefreshCache(): Boolean {
+        return cacheTime?.isBefore(LocalDateTime.now().minusHours(24)) ?: true
+    }
+}
+
+// 비즈니스 로직 레이어
+@Service
+class YourServiceCore(private val yourApiClient: YourApiClient) {
+    fun fetchData(): YourData {
+        // API 호출 + 데이터 가공
+    }
+}
 ```
 
-### 주요 설정 포인트
-- **Groq API**: OpenAI 호환 엔드포인트 사용
-- **기상청 API**: 중기예보조회서비스 전용
-- **환경변수**: dotenv-kotlin으로 안전한 키 관리
+## 🌤️ 날씨 도구 동작 방식
 
-## 🔧 개발 노트
+1. **사용자**: "내일 서울 날씨 어때?"
+2. **Spring AI**: 메시지 분석 → WeatherTool 자동 호출
+3. **WeatherTool**: `getWeatherForecast("서울")` 실행
+4. **WeatherService**: 캐시 확인 → 필요시 WeatherServiceCore 호출
+5. **WeatherServiceCore**: 기상청 API 3개 호출 + 데이터 통합
+6. **AI**: 날씨 데이터를 포함한 자연스러운 답변 생성
 
-### Map 기반 최적화
-- 기존 day3~day10 개별 필드 → Map 기반 구조로 변경
-- 중복 코드 제거 및 확장성 향상
-- JSON 직렬화 호환성 유지
+## 📊 데이터베이스 스키마
 
-### 에러 처리
-- API 실패시 빈 데이터 객체로 fallback
-- 종합적인 로깅으로 디버깅 지원
-- 일부 API 실패해도 나머지 데이터로 응답 제공
+Mermaid ERD는 `docs/erd-diagram.md` 참조
 
-### 시간대 처리
-- 기상청 API는 KST 기준 발표
-- 현재 시간 기준으로 최신 발표시각 자동 계산
-- 06시/18시 하루 2회 발표 스케줄 반영
+- **User**: 사용자 정보 (OAuth)
+- **ChatSession**: 채팅 세션 (1:N)
+- **ChatMessage**: 메시지 내용 (role: user/assistant)
 
-## 🚀 확장 가능성
+## 🔧 개발 가이드
 
-### 추가 기능 아이디어
-- 🏖️ 해상예보 API 통합 (getMidSeaFcst)
-- 🌡️ 체감온도 계산 추가
-- 📈 날씨 변화 트렌드 분석
-- 🔔 날씨 알림 기능
-- 📍 GPS 기반 현재 위치 날씨
+### 환경별 설정
 
-### 기술적 확장
-- Redis 캐싱으로 API 호출 최적화
-- GraphQL API 추가
-- 실시간 WebSocket 날씨 업데이트
-- Docker 컨테이너화
+**개발 환경**: H2 인메모리 DB, 모든 보안 비활성화
+**운영 환경**: PostgreSQL, JWT 인증, HTTPS
+
+### 코드 스타일
+
+- **ktlint**: Kotlin 코드 스타일 검사
+- **TODO 주석**: 각 파일 상단에 용도 설명
+- **DDD 구조**: 도메인별 패키지 분리
+
+### 테스트
+
+```bash
+./gradlew test          # 전체 테스트
+./gradlew ktlintCheck   # 코드 스타일 검사
+```
+
+## 📝 문서
+
+- **API 명세**: `docs/api-specification.yaml`
+- **ERD**: `docs/erd-diagram.md`
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+
+## 🤝 기여 방법
+
+1. 이슈 생성 또는 기존 이슈 확인
+2. 브랜치 생성: `feature/기능명` 또는 `fix/버그명`
+3. 커밋 메시지: 한글로 명확하게
+4. PR 생성: 변경사항과 테스트 결과 포함
+
+## 📞 문의
+
+- **팀**: 한국 여행 가이드 개발팀
+- **이슈**: GitHub Issues 활용
+- **문서**: `docs/` 폴더 참조
+
+---
+
+**🚀 Spring AI + Kotlin으로 만드는 스마트 여행 가이드!**

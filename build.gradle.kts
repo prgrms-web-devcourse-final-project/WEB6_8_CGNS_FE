@@ -6,8 +6,6 @@ plugins {
 	kotlin("plugin.jpa") version "1.9.25"
 	// ktlint plugin
 	id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
-	// detekt plugin
-	id("io.gitlab.arturbosch.detekt") version "1.23.4"
 }
 
 group = "com.back"
@@ -34,28 +32,25 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	
 	// Spring AI
 	implementation("org.springframework.ai:spring-ai-starter-model-openai")
 	
 	// XML parsing for weather API
 	implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
-	implementation("org.springframework:spring-webflux")
 	implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
 	
 	// Dotenv for environment variables
 	implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
+	// Swagger UI for API documentation
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 	
 	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -99,21 +94,3 @@ ktlint {
 	}
 }
 
-// detekt configuration
-detekt {
-	config = files(".config/detekt/detekt.yml") // detekt 설정 파일 필요 (선택사항)
-	buildUponDefaultConfig = true
-	allRules = false
-	ignoreFailures = false
-	parallel = true
-	autoCorrect = true // detekt가 일부 문제를 자동 수정하도록 허용
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-	reports {
-		html.required.set(true)
-		xml.required.set(true)
-		txt.required.set(true)
-		sarif.required.set(true)
-	}
-}

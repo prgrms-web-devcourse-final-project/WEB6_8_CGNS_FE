@@ -1,5 +1,6 @@
-package com.back.config
+package com.back.koreaTravelGuide.infrastructure.config
 
+// TODO: 보안 설정 - 개발용 전체 허용 설정 (운영 시 수정 필요)
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -11,14 +12,12 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { auth ->
                 auth.anyRequest().permitAll()
             }
             .csrf { csrf -> csrf.disable() }
-            .headers { headers -> headers.frameOptions { it.disable() } }
-
         return http.build()
     }
 }

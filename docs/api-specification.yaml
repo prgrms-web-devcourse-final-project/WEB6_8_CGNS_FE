@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: 한국 여행 가이드 API
+  description: Spring AI 기반 한국 여행 가이드 챗봇 서비스
+  version: 1.0.0
+  contact:
+    name: 개발팀
+    email: dev@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: 로컬 개발 서버
+
+tags:
+  - name: users
+    description: 사용자 관리
+  - name: chats
+    description: 채팅 관리
+
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: 응답 메시지
+        data:
+          type: object
+          description: 응답 데이터
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        nickname:
+          type: string
+        email:
+          type: string
+          format: email
+        profileImage:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatSession:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+
+    ChatMessage:
+      type: object
+      properties:
+        messageId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        createdAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/users/oauth/login:
+    post:
+      tags:
+        - users
+      summary: OAuth 로그인
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  enum: [google, kakao, naver]
+                code:
+                  type: string
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/User'
+                          - type: object
+                            properties:
+                              token:
+                                type: string
+        '400':
+          description: 잘못된 요청
+
+  /api/users/logout:
+    post:
+      tags:
+        - users
+      summary: 로그아웃
+      responses:
+        '200':
+          description: 로그아웃 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/users/withdrawal:
+    delete:
+      tags:
+        - users
+      summary: 회원탈퇴
+      responses:
+        '200':
+          description: 회원탈퇴 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/users/profile:
+    get:
+      tags:
+        - users
+      summary: 프로필 조회
+      responses:
+        '200':
+          description: 프로필 조회 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+
+  /api/chats/sessions:
+    get:
+      tags:
+        - chats
+      summary: 채팅 세션 목록 조회
+      responses:
+        '200':
+          description: 세션 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChatSession'
+
+    post:
+      tags:
+        - chats
+      summary: 새 채팅 세션 생성
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 세션 제목 (선택사항)
+      responses:
+        '201':
+          description: 세션 생성 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ChatSession'
+
+  /api/chats/sessions/{sessionId}/messages:
+    get:
+      tags:
+        - chats
+      summary: 채팅 기록 조회
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 채팅 기록 조회 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          sessionId:
+                            type: integer
+                            format: int64
+                          title:
+                            type: string
+                          messages:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/ChatMessage'
+
+    post:
+      tags:
+        - chats
+      summary: 메시지 전송 및 AI 응답
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: 사용자 메시지
+      responses:
+        '200':
+          description: 메시지 전송 완료
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          userMessage:
+                            $ref: '#/components/schemas/ChatMessage'
+                          assistantMessage:
+                            $ref: '#/components/schemas/ChatMessage'
