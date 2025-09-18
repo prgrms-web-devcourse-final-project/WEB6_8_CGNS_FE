@@ -109,20 +109,38 @@ class WeatherApiClient(
         val precipitationData = PrecipitationData()
 
         for (day in 4..10) {
-            val amRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Am") as? Number)?.toInt()
-            val pmRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Pm") as? Number)?.toInt()
-            val amWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Am") as? String
-            val pmWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Pm") as? String
+            if (day <= 7) {
+                // 4~7일: 오전/오후 구분
+                val amRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Am") as? Number)?.toInt()
+                val pmRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Pm") as? Number)?.toInt()
+                val amWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Am") as? String
+                val pmWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Pm") as? String
 
-            if (amRain != null || pmRain != null || !amWeather.isNullOrBlank() || !pmWeather.isNullOrBlank()) {
-                val precipInfo = PrecipitationInfo(
-                    amRainPercent = amRain,
-                    pmRainPercent = pmRain,
-                    amWeather = amWeather,
-                    pmWeather = pmWeather
-                )
+                if (amRain != null || pmRain != null || !amWeather.isNullOrBlank() || !pmWeather.isNullOrBlank()) {
+                    val precipInfo = PrecipitationInfo(
+                        amRainPercent = amRain,
+                        pmRainPercent = pmRain,
+                        amWeather = amWeather,
+                        pmWeather = pmWeather
+                    )
 
-                precipitationData.setDay(day, precipInfo)
+                    precipitationData.setDay(day, precipInfo)
+                }
+            } else {
+                // 8~10일: 통합 (오전/오후 구분 없음)
+                val rainPercent = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt$day") as? Number)?.toInt()
+                val weather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf$day") as? String
+
+                if (rainPercent != null || !weather.isNullOrBlank()) {
+                    val precipInfo = PrecipitationInfo(
+                        amRainPercent = rainPercent,
+                        pmRainPercent = null,
+                        amWeather = weather,
+                        pmWeather = null
+                    )
+
+                    precipitationData.setDay(day, precipInfo)
+                }
             }
         }
 

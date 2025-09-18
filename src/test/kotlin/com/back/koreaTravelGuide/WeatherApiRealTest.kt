@@ -177,13 +177,27 @@ class WeatherApiRealTest {
         println("✅ 강수 확률 데이터 (4일~10일):")
         println("----------------------------------------")
         for (day in 4..10) {
-            val amRain = firstItem?.get("rnSt${day}Am")
-            val pmRain = firstItem?.get("rnSt${day}Pm")
-            val amWeather = firstItem?.get("wf${day}Am")
-            val pmWeather = firstItem?.get("wf${day}Pm")
-            println("📅 ${day}일 후:")
-            println("   오전: $amWeather (강수확률: $amRain%)")
-            println("   오후: $pmWeather (강수확률: $pmRain%)")
+            if (day <= 7) {
+                // 4~7일: 오전/오후 구분
+                val amRain = firstItem?.get("rnSt${day}Am")
+                val pmRain = firstItem?.get("rnSt${day}Pm")
+                val amWeather = firstItem?.get("wf${day}Am")
+                val pmWeather = firstItem?.get("wf${day}Pm")
+                
+                if (amRain != null || pmRain != null || amWeather != null || pmWeather != null) {
+                    println("📅 ${day}일 후:")
+                    println("   오전: ${amWeather ?: "정보없음"} (강수확률: ${amRain ?: 0}%)")
+                    println("   오후: ${pmWeather ?: "정보없음"} (강수확률: ${pmRain ?: 0}%)")
+                }
+            } else {
+                // 8~10일: 통합 (오전/오후 구분 없음)
+                val rainPercent = firstItem?.get("rnSt$day")
+                val weather = firstItem?.get("wf$day")
+                
+                if (rainPercent != null || weather != null) {
+                    println("📅 ${day}일 후: ${weather ?: "정보없음"} (강수확률: ${rainPercent ?: 0}%)")
+                }
+            }
         }
         println()
     }
