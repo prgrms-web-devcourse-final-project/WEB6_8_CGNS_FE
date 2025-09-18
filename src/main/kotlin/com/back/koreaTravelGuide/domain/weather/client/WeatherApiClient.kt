@@ -1,6 +1,6 @@
 package com.back.koreaTravelGuide.domain.weather.client
 
-// TODO: 기상청 API 클라이언트 - HTTP 요청으로 날씨 데이터 조회 및 XML 파싱
+// TODO: 기상청 API 클라이언트 - HTTP 요청으로 날씨 데이터 조회 및 JSON 파싱
 import com.back.koreaTravelGuide.domain.weather.dto.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -16,76 +16,79 @@ class WeatherApiClient(
     // 1. 중기전망조회 (getMidFcst) - 텍스트 기반 전망
     fun fetchMidForecast(regionId: String, baseTime: String): String? {
         val stnId = getStnIdFromRegionCode(regionId)
-        val url = "$apiUrl/getMidFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&stnId=$stnId&tmFc=$baseTime&dataType=XML"
+        val url = "$apiUrl/getMidFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&stnId=$stnId&tmFc=$baseTime&dataType=JSON"
 
         println("🔮 중기전망조회 API 호출: $url")
 
         return try {
-            val xmlResponse = restTemplate.getForObject(url, String::class.java)
-            println("📡 중기전망 응답 수신 (길이: ${xmlResponse?.length ?: 0})")
+            @Suppress("UNCHECKED_CAST")
+            val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
+            println("📡 중기전망 JSON 응답 수신")
 
-            // API 오류 응답 체크
-            xmlResponse?.let { response ->
-                if (response.contains("<resultCode>03</resultCode>") || response.contains("NO_DATA")) {
+            jsonResponse?.let { response ->
+                // API 오류 응답 체크
+                val resultCode = extractJsonValue(response, "response.header.resultCode") as? String
+                if (resultCode == "03" || resultCode == "NO_DATA") {
                     println("⚠️ 기상청 API NO_DATA 오류 - 발표시각을 조정해야 할 수 있습니다")
                     return null
                 }
 
-                val wfSvMatch = Regex("<wfSv><!\\[CDATA\\[(.*?)]]></wfSv>").find(response)
-                wfSvMatch?.groupValues?.get(1)?.trim()
+                extractJsonValue(response, "response.body.items.item[0].wfSv") as? String
             }
         } catch (e: Exception) {
-            println("❌ 중기전망조회 API 오류: ${e.message}")
+            println("❌ 중기전망조회 JSON API 오류: ${e.message}")
             null
         }
     }
     
     // 2. 중기기온조회 (getMidTa) - 상세 기온 정보
     fun fetchTemperature(regionId: String, baseTime: String): TemperatureData? {
-        val url = "$apiUrl/getMidTa?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=XML"
+        val url = "$apiUrl/getMidTa?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
         println("🌡️ 중기기온조회 API 호출: $url")
 
         return try {
-            val xmlResponse = restTemplate.getForObject(url, String::class.java)
-            println("📡 중기기온 응답 수신 (길이: ${xmlResponse?.length ?: 0})")
+            @Suppress("UNCHECKED_CAST")
+            val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
+            println("📡 중기기온 JSON 응답 수신")
 
-            xmlResponse?.let { parseTemperatureData(it) } ?: TemperatureData()
+            jsonResponse?.let { parseTemperatureDataFromJson(it) } ?: TemperatureData()
         } catch (e: Exception) {
-            println("❌ 중기기온조회 API 오류: ${e.message}")
+            println("❌ 중기기온조회 JSON API 오류: ${e.message}")
             TemperatureData()
         }
     }
     
     // 3. 중기육상예보조회 (getMidLandFcst) - 강수 확률
     fun fetchLandForecast(regionId: String, baseTime: String): PrecipitationData? {
-        val url = "$apiUrl/getMidLandFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=XML"
+        val url = "$apiUrl/getMidLandFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
         println("🌧️ 중기육상예보조회 API 호출: $url")
 
         return try {
-            val xmlResponse = restTemplate.getForObject(url, String::class.java)
-            println("📡 중기육상예보 응답 수신 (길이: ${xmlResponse?.length ?: 0})")
+            @Suppress("UNCHECKED_CAST")
+            val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
+            println("📡 중기육상예보 JSON 응답 수신")
 
-            xmlResponse?.let { parsePrecipitationData(it) } ?: PrecipitationData()
+            jsonResponse?.let { parsePrecipitationDataFromJson(it) } ?: PrecipitationData()
         } catch (e: Exception) {
-            println("❌ 중기육상예보조회 API 오류: ${e.message}")
+            println("❌ 중기육상예보조회 JSON API 오류: ${e.message}")
             PrecipitationData()
         }
     }
     
-    // 기온 데이터 파싱
-    private fun parseTemperatureData(xmlResponse: String): TemperatureData {
+    // 기온 데이터 JSON 파싱
+    private fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
         val temperatureData = TemperatureData()
-        
+
         for (day in 4..10) {
-            val minTemp = extractXmlValue(xmlResponse, "taMin$day")?.toIntOrNull()
-            val maxTemp = extractXmlValue(xmlResponse, "taMax$day")?.toIntOrNull()
-            val minTempLow = extractXmlValue(xmlResponse, "taMin${day}Low")?.toIntOrNull()
-            val minTempHigh = extractXmlValue(xmlResponse, "taMin${day}High")?.toIntOrNull()
-            val maxTempLow = extractXmlValue(xmlResponse, "taMax${day}Low")?.toIntOrNull()
-            val maxTempHigh = extractXmlValue(xmlResponse, "taMax${day}High")?.toIntOrNull()
-            
+            val minTemp = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMin$day") as? Number)?.toInt()
+            val maxTemp = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMax$day") as? Number)?.toInt()
+            val minTempLow = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMin${day}Low") as? Number)?.toInt()
+            val minTempHigh = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMin${day}High") as? Number)?.toInt()
+            val maxTempLow = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMax${day}Low") as? Number)?.toInt()
+            val maxTempHigh = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMax${day}High") as? Number)?.toInt()
+
             if (minTemp != null || maxTemp != null) {
                 val tempInfo = TemperatureInfo(
                     minTemp = minTemp,
@@ -93,24 +96,24 @@ class WeatherApiClient(
                     minTempRange = if (minTempLow != null && minTempHigh != null) "$minTempLow~$minTempHigh℃" else null,
                     maxTempRange = if (maxTempLow != null && maxTempHigh != null) "$maxTempLow~$maxTempHigh℃" else null
                 )
-                
+
                 temperatureData.setDay(day, tempInfo)
             }
         }
-        
+
         return temperatureData
     }
     
-    // 강수 확률 데이터 파싱
-    private fun parsePrecipitationData(xmlResponse: String): PrecipitationData {
+    // 강수 확률 데이터 JSON 파싱
+    private fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): PrecipitationData {
         val precipitationData = PrecipitationData()
-        
+
         for (day in 4..10) {
-            val amRain = extractXmlValue(xmlResponse, "rnSt${day}Am")?.toIntOrNull()
-            val pmRain = extractXmlValue(xmlResponse, "rnSt${day}Pm")?.toIntOrNull()
-            val amWeather = extractXmlValue(xmlResponse, "wf${day}Am")
-            val pmWeather = extractXmlValue(xmlResponse, "wf${day}Pm")
-            
+            val amRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Am") as? Number)?.toInt()
+            val pmRain = (extractJsonValue(jsonResponse, "response.body.items.item[0].rnSt${day}Pm") as? Number)?.toInt()
+            val amWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Am") as? String
+            val pmWeather = extractJsonValue(jsonResponse, "response.body.items.item[0].wf${day}Pm") as? String
+
             if (amRain != null || pmRain != null || !amWeather.isNullOrBlank() || !pmWeather.isNullOrBlank()) {
                 val precipInfo = PrecipitationInfo(
                     amRainPercent = amRain,
@@ -118,17 +121,37 @@ class WeatherApiClient(
                     amWeather = amWeather,
                     pmWeather = pmWeather
                 )
-                
+
                 precipitationData.setDay(day, precipInfo)
             }
         }
-        
+
         return precipitationData
     }
     
-    private fun extractXmlValue(xmlResponse: String, tagName: String): String? {
-        val regex = Regex("<$tagName>(.*?)</$tagName>")
-        return regex.find(xmlResponse)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotBlank() }
+    // JSON에서 값 추출 ("response.body.items.item[0].wfSv" 같은 경로로)
+    private fun extractJsonValue(jsonMap: Map<String, Any>, path: String): Any? {
+        var current: Any? = jsonMap
+        val parts = path.split(".")
+
+        for (part in parts) {
+            when {
+                current == null -> return null
+                part.contains("[") && part.contains("]") -> {
+                    // 배열 인덱스 처리 (item[0] 같은 경우)
+                    val arrayName = part.substringBefore("[")
+                    val index = part.substringAfter("[").substringBefore("]").toIntOrNull() ?: 0
+
+                    current = (current as? Map<*, *>)?.get(arrayName)
+                    current = (current as? List<*>)?.getOrNull(index)
+                }
+                else -> {
+                    current = (current as? Map<*, *>)?.get(part)
+                }
+            }
+        }
+
+        return current
     }
     
     private fun getStnIdFromRegionCode(regionCode: String): String {

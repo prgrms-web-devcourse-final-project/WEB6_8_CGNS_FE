@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 /**
  * 전역 예외 처리기
@@ -76,6 +77,22 @@ class GlobalExceptionHandler {
     fun handleNoSuchElement(ex: NoSuchElementException): ResponseEntity<ApiResponse<Void>> {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(ApiResponse(ex.message ?: "요청한 데이터를 찾을 수 없습니다"))
+    }
+
+    /**
+     * 리소스 없음 처리 (404 Not Found) - favicon.ico 등
+     */
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceFound(ex: NoResourceFoundException): ResponseEntity<ApiResponse<Void>> {
+        // favicon.ico 요청은 조용히 무시 (로그 안 남김)
+        if (ex.message?.contains("favicon.ico") == true) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
+
+        // 다른 리소스는 로그 남기고 처리
+        println("⚠️ 리소스를 찾을 수 없음: ${ex.message}")
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ApiResponse("요청한 리소스를 찾을 수 없습니다"))
     }
 
     /**
