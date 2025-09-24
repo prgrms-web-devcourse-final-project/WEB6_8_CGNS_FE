@@ -28,20 +28,23 @@ jobs:
       id: file-content
       run: |
         CONTENT=""
-        while IFS= read -r file; do
-          if [ -f "$file" ] && [ -s "$file" ]; then
-            echo "Processing: $file"
-            CONTENT="$CONTENT\n\n--- File: $file ---\n"
-            # Limit file size to avoid API limits
-            head -c 8000 "$file" >> temp_content.txt
-            CONTENT="$CONTENT$(cat temp_content.txt)"
-            rm -f temp_content.txt
-          fi
-        done <<< "${{ steps.changed-files.outputs.files }}"
+        if [ -n "${{ steps.changed-files.outputs.files }}" ]; then
+          while IFS= read -r file; do
+            if [ -f "$file" ] && [ -s "$file" ]; then
+              echo "Processing: $file"
+              CONTENT="$CONTENT\n\n--- File: $file ---\n"
+              head -c 8000 "$file" | cat >> temp_content.txt
+              CONTENT="$CONTENT$(cat temp_content.txt)"
+              rm -f temp_content.txt
+            fi
+          done <<< "${{ steps.changed-files.outputs.files }}"
+        fi
 
-        echo "content<<EOF" >> $GITHUB_OUTPUT
-        echo -e "$CONTENT" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        {
+          echo "content<<EOF"
+          echo -e "$CONTENT"
+          echo "EOF"
+        } >> $GITHUB_OUTPUT
 
     - name: AI Code Review
       id: ai-review
@@ -67,8 +70,7 @@ jobs:
                 "content": "다음 PR의 변경사항을 리뷰해주세요:\n\nPR 제목: ${{ github.event.pull_request.title }}\nPR 설명: ${{ github.event.pull_request.body }}\n\n변경된 파일들:\n${{ steps.file-content.outputs.content }}"
               }
             ],
-            "temperature": 0.3,
-            "max_tokens": 4000
+            "temperature": 0.3
           }')
 
         # Extract the review content
