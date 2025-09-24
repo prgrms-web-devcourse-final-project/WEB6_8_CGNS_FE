@@ -1,9 +1,11 @@
 package com.back.koreaTravelGuide.common.exception
 
 import com.back.koreaTravelGuide.common.ApiResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -35,18 +37,18 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
  */
 @ControllerAdvice
 class GlobalExceptionHandler {
-
     /**
      * @Valid 검증 실패 처리 (400 Bad Request)
      */
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Void>> {
-        val message = ex.bindingResult
-            .allErrors
-            .filterIsInstance<FieldError>()
-            .joinToString("\n") { error ->
-                "${error.field}: ${error.defaultMessage}"
-            }
+        val message =
+            ex.bindingResult
+                .allErrors
+                .filterIsInstance<FieldError>()
+                .joinToString("\n") { error ->
+                    "${error.field}: ${error.defaultMessage}"
+                }
 
         return ResponseEntity.badRequest()
             .body(ApiResponse("입력값 검증 실패\n$message"))
@@ -96,16 +98,51 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * 접근 거부 처리 (403 Forbidden)
+     */
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDenied(ex: AccessDeniedException): ResponseEntity<ApiResponse<Void>> {
+        println("🚫 접근 거부: ${ex.message}")
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ApiResponse("접근 권한이 없습니다"))
+    }
+
+    /**
      * 모든 예외 처리 (500 Internal Server Error)
      * 위에서 처리되지 않은 모든 예외들의 최종 처리
+     *
+     * 주니어 개발자용 디버깅 정보 추가:
+     * - 상세한 에러 스택 트레이스
+     * - 요청 정보 로깅
+     * - 개발환경에서는 더 자세한 정보 제공
      */
     @ExceptionHandler(Exception::class)
-    fun handleGenericException(ex: Exception): ResponseEntity<ApiResponse<Void>> {
-        println("❌ 예상치 못한 예외 발생: ${ex::class.simpleName}")
-        println("❌ 메시지: ${ex.message}")
+    fun handleGenericException(
+        ex: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<ApiResponse<Map<String, Any?>>> {
+        println("❌ 예상치 못한 예외 발생!")
+        println("   클래스: ${ex::class.simpleName}")
+        println("   메시지: ${ex.message}")
+        println("   요청 URL: ${request.method} ${request.requestURL}")
+        println("   요청 IP: ${request.remoteAddr}")
+        println("   User-Agent: ${request.getHeader("User-Agent")}")
+
+        // 개발환경에서는 스택트레이스도 출력
         ex.printStackTrace()
 
+        // 개발환경에서는 더 자세한 에러 정보 제공 (주니어 개발자 도움용)
+        val debugInfo = mutableMapOf<String, Any?>()
+        debugInfo["timestamp"] = System.currentTimeMillis()
+        debugInfo["path"] = request.requestURI
+        debugInfo["method"] = request.method
+        debugInfo["error"] = ex::class.simpleName
+        debugInfo["message"] = ex.message
+
+        // 스택 트레이스의 첫 3줄만 포함 (너무 길어지지 않도록)
+        debugInfo["trace"] = ex.stackTrace.take(3).map { it.toString() }
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ApiResponse("서버 내부 오류가 발생했습니다"))
+            .body(ApiResponse("서버 내부 오류가 발생했습니다", debugInfo))
     }
 }

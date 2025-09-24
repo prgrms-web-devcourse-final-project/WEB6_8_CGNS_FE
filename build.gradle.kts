@@ -1,11 +1,11 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.5.5"
-	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("plugin.jpa") version "1.9.25"
-	// ktlint plugin
-	id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("plugin.jpa") version "1.9.25"
+    // ktlint plugin
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 group = "com.back"
@@ -13,84 +13,93 @@ version = "0.0.1-SNAPSHOT"
 description = "backend"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
-	mavenCentral()
-	maven { url = uri("https://repo.spring.io/milestone") }
-	maven { url = uri("https://repo.spring.io/snapshot") }
+    mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
-
-extra["springAiVersion"] = "1.0.1"
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	
-	// Spring AI
-	implementation("org.springframework.ai:spring-ai-starter-model-openai")
-	
-	// XML parsing for weather API
-	implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
-	implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
-	
-	// Dotenv for environment variables
-	implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-	// Swagger UI for API documentation
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
-	
-	runtimeOnly("com.h2database:h2")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.springframework.security:spring-security-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Spring AI - 1.0.0-M6 (OpenRouter 호환) - 확인된 버전
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M6")
+
+    // Dotenv for environment variables
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
+    // Security: Force newer versions to avoid CVE vulnerabilities
+    implementation("org.apache.commons:commons-lang3:3.18.0") // CVE-2025-48924 해결
+
+    // WebSocket for user chat (Guest-Guide)
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // Redis for caching and session management
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.session:spring-session-data-redis")
+
+    // Swagger UI for API documentation
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
+
+    // Development tools for 5-person team
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    // Monitoring & Health checks (개발자 디버깅용)
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // Database support
+    runtimeOnly("com.h2database:h2") // Development
+    runtimeOnly("org.postgresql:postgresql") // Production
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.springframework.security:spring-security-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-dependencyManagement {
-	imports {
-		mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
-	}
-}
+// BOM 제거: Spring AI 1.0.0-M6에서 직접 버전 관리
+// dependencyManagement 제거로 더 명확한 의존성 관리
 
 kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 allOpen {
-	annotation("jakarta.persistence.Entity")
-	annotation("jakarta.persistence.MappedSuperclass")
-	annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 // ktlint configuration
 ktlint {
-	android.set(false)
-	outputToConsole.set(true)
-	ignoreFailures.set(false)
-	enableExperimentalRules.set(true)
-	// additionalEditorconfigFile.set(file(".editorconfig")) // .editorconfig 파일이 있다면 주석 해제
-	reporters {
-		reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
-		reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
-	}
-	filter {
-		exclude("**/generated/**")
-		include("**/kotlin/**")
-	}
+    android.set(false)
+    outputToConsole.set(true)
+    ignoreFailures.set(false)
+    enableExperimentalRules.set(true)
+    // additionalEditorconfigFile.set(file(".editorconfig")) // .editorconfig 파일이 있다면 주석 해제
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+    }
 }
-

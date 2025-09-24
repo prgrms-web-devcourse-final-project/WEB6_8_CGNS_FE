@@ -1,43 +1,110 @@
 spring:
+  profiles:
+    active: dev
+
+  # Spring AI 1.0.0-M6 설정 (OpenRouter 사용)
   ai:
     openai:
-      api-key: ${GROQ_API_KEY}
-      base-url: https://api.groq.com/openai
+      base-url: https://openrouter.ai/api
+      api-key: ${OPENROUTER_API_KEY}
       chat:
         options:
-          model: openai/gpt-oss-120b
+          model: ${OPENROUTER_MODEL}
           temperature: 0.7
-          max-tokens: 4096
+
+  # 개발용 H2 Database 설정 (주니어 개발자용)
+  datasource:
+    url: jdbc:h2:mem:korea_travel_guide
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true # http://localhost:8080/h2-console에서 DB 확인 가능
+      path: /h2-console
+      settings:
+        web-allow-others: true # 팀원들이 다른 PC에서도 접근 가능
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 개발용: 서버 재시작시 DB 초기화
+    show-sql: true # SQL 로그 출력 (디버깅용)
+    properties:
+      hibernate:
+        format_sql: true # SQL 포맷팅
+
+  # WebSocket 설정 (Guest-Guide 채팅용)
+  websocket:
+    allowed-origins: "http://localhost:3000,http://localhost:3001,http://localhost:8080"
+
+  # 개발 도구 활성화
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+
+  # Redis 설정 (캐싱 및 세션 저장소)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # 세션 관리 (개발용: none, 운영용: redis)
+  session:
+    store-type: none  # Redis 없어도 실행 가능하도록 변경
+    timeout: 30m
           
+# Swagger API 문서 설정 (주니어 개발자용)
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    operations-sorter: method
+
 # Weather API 설정
 weather:
   api:
-    key: ${WEATHER_API_KEY}
+    key: ${WEATHER_API_KEY:your-weather-api-key-here}
     base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
 
-# AI 채팅 프롬프트 설정
-chat:
-  system-prompt: |
-    당신은 한국 여행 전문가 AI입니다.
 
-    **시간 처리 규칙:**
-    - 사용자가 시간대를 명시하지 않으면 한국 표준시(KST)로 처리합니다
-    - 사용자가 다른 시간대를 명시하면 자동으로 KST로 변환합니다
-    - 예: 미국 동부시간 5:50 PM → 한국시간 다음날 7:50 AM
-    - 날씨 정보는 항상 "한국 기준 X월 X일" 형태로 안내합니다
-
-    **도구 사용 규칙:**
-    - 날씨 정보가 필요하면 WeatherTool을 사용하세요
-    - 관광 정보가 필요하면 TourTool을 사용하세요 (미구현)
-    - 현재 시간이 필요하면 getCurrentTime() 도구를 사용하세요
-
-    **응답 스타일:**
-    - 친근하고 정확한 한국어로 답변하세요
-    - 날씨는 구체적인 날짜와 함께 설명하세요
-    - 사용자가 해외에서 요청한다면 시간대 차이를 명확히 설명하세요
-
-# 로깅 설정
+# 로깅 설정 (주니어 개발자 디버깅용)
 logging:
   level:
+    root: INFO
     org.springframework.ai: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
     com.back: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 서버 설정 (개발용)
+server:
+  port: 8080
+  error:
+    include-stacktrace: always # 에러 스택트레이스 포함 (개발용)
+
+# 관리 엔드포인트 (개발/디버깅용)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,beans
+  endpoint:
+    health:
+      show-details: always

@@ -42,4 +42,34 @@ out/
 ### Environment Variables ###
 .env
 
+### Claude Code ###
 .claude/*
+
+### Logs ###
+logs/
+*.log
+application*.log
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Temporary files ###
+*.tmp
+*.temp
+*~
+
+### ktlint ###
+.ktlint.cache
+
+### Database ###
+*.db
+*.sqlite
+*.sqlite3
+
+### Redis dump ###
+dump.rdb
+
+### Coverage reports ###
+build/reports/
+coverage/
