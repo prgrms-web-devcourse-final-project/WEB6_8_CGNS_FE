@@ -20,9 +20,9 @@ jobs:
       run: |
         # Get the list of changed files
         CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '\.(kt|kts|java|sql|yml|yaml|properties|md)$' | head -20)
-        echo "files<<EOF" >> $GITHUB_OUTPUT
+        echo "files<<CHANGEDFILES" >> $GITHUB_OUTPUT
         echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        echo "CHANGEDFILES" >> $GITHUB_OUTPUT
 
     - name: Read changed files content
       id: file-content
@@ -32,19 +32,19 @@ jobs:
           while IFS= read -r file; do
             if [ -f "$file" ] && [ -s "$file" ]; then
               echo "Processing: $file"
-              CONTENT="$CONTENT\n\n--- File: $file ---\n"
-              head -c 8000 "$file" | cat >> temp_content.txt
-              CONTENT="$CONTENT$(cat temp_content.txt)"
-              rm -f temp_content.txt
+              CONTENT="${CONTENT}
+
+--- File: $file ---
+"
+              FILE_CONTENT=$(head -c 8000 "$file")
+              CONTENT="${CONTENT}${FILE_CONTENT}"
             fi
           done <<< "${{ steps.changed-files.outputs.files }}"
         fi
 
-        {
-          echo "content<<EOF"
-          echo -e "$CONTENT"
-          echo "EOF"
-        } >> $GITHUB_OUTPUT
+        echo "content<<FILECONTENT" >> $GITHUB_OUTPUT
+        echo "$CONTENT" >> $GITHUB_OUTPUT
+        echo "FILECONTENT" >> $GITHUB_OUTPUT
 
     - name: AI Code Review
       id: ai-review
