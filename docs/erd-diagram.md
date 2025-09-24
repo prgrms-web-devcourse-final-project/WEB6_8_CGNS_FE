@@ -47,7 +47,6 @@ erDiagram
         bigint session_id FK "세션 ID"
         text content "메시지 내용"
         enum sender_type "USER, AI"
-        json metadata "AI 도구 사용 정보"
         datetime created_at "메시지 전송 시간"
     }
 
@@ -143,7 +142,6 @@ AI 채팅 메시지를 저장하는 테이블입니다.
 | session_id | BIGINT | FK, NOT NULL | 세션 ID |
 | content | TEXT | NOT NULL | 메시지 내용 |
 | sender_type | ENUM | NOT NULL | 발신자 유형 (USER, AI) |
-| metadata | JSON | NULL | AI 도구 사용 정보 (WeatherTool, TourTool) |
 | created_at | DATETIME | NOT NULL | 메시지 전송 시간 |
 
 **제약조건:**
@@ -243,7 +241,7 @@ Guest가 AI 채팅 세션과 채팅방을 평가하는 테이블입니다.
 1. User → AiChatSession 생성
 2. User → AiChatMessage 전송
 3. Spring AI → WeatherTool/TourTool 호출
-4. AI → AiChatMessage(sender_type=AI) 생성 + metadata 저장
+4. AI → AiChatMessage(sender_type=AI) 생성
 5. SSE로 실시간 응답 전송
 ```
 
