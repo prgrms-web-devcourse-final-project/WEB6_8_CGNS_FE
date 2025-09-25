@@ -34,7 +34,7 @@ cp .env.example .env
 
 ### Commit 메시지
 ```
-{type}({scope}): {summary}
+{type}({scope}/{branch_number): {summary}
 ```
 **예시**: `feat(be): 사용자 API 구현`
 
