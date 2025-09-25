@@ -37,7 +37,7 @@ class DataParser {
     }
 
     // 기온 데이터 JSON 파싱
-     fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
+    fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
         val temperatureData = TemperatureData()
 
         for (day in 4..10) {
@@ -65,7 +65,7 @@ class DataParser {
     }
 
     // 강수 확률 데이터 JSON 파싱
-     fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): LandForecastData {
+    fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): LandForecastData {
         val landForecastData = LandForecastData()
 
         for (day in 4..10) {
@@ -105,8 +105,6 @@ class DataParser {
                 }
             }
         }
-
-
 
         return landForecastData
     }

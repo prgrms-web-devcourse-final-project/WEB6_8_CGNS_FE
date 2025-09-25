@@ -7,7 +7,10 @@ import kotlin.text.set
 class TemperatureData(
     private val days: MutableMap<Int, TemperatureInfo?> = mutableMapOf(),
 ) {
-    fun setDay(day: Int, info: TemperatureInfo?, ) {
+    fun setDay(
+        day: Int,
+        info: TemperatureInfo?,
+    ) {
         days[day] = info
     }
 
@@ -15,7 +18,9 @@ class TemperatureData(
 
     var day4: TemperatureInfo?
         get() = days[4]
-        set(value) { days[4] = value }
+        set(value) {
+            days[4] = value
+        }
 
     var day5: TemperatureInfo? get() = days[5]
         set(value) {
