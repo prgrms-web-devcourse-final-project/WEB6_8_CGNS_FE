@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class DataParser {
     // JSON에서 값 추출 ("response.body.items.item[0].wfSv" 같은 경로로)
-     fun extractJsonValue(
+    fun extractJsonValue(
         jsonMap: Map<String, Any>,
         path: String,
     ): Any? {
@@ -35,7 +35,7 @@ class DataParser {
     }
 
     // 기온 데이터 JSON 파싱
-     fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
+    fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
         val TemperatureData = TemperatureData()
 
         for (day in 4..10) {
@@ -63,7 +63,7 @@ class DataParser {
     }
 
     // 강수 확률 데이터 JSON 파싱
-     fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): PrecipitationData {
+    fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): PrecipitationData {
         val precipitationData = PrecipitationData()
 
         for (day in 4..10) {

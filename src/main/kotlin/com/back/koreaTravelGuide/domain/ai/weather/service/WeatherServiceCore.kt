@@ -11,9 +11,7 @@ class WeatherServiceCore(
     val weatherService: WeatherService,
     val tools: Tools,
 ) {
-    fun getWeatherForecast(
-        baseTime: String?,
-    ): List<MidForecastDto>? {
+    fun getWeatherForecast(baseTime: String?): List<MidForecastDto>? {
         // baseTime 유효성 검사 - 06시 또는 18시만 허용
         val actualBaseTime = tools.validBaseTime(baseTime)
 

@@ -3,7 +3,6 @@ package com.back.koreaTravelGuide.domain.ai.weather.client
 // TODO: 기상청 API 클라이언트 - HTTP 요청으로 날씨 데이터 조회 및 JSON 파싱
 import com.back.koreaTravelGuide.domain.ai.weather.client.parser.DataParser
 import com.back.koreaTravelGuide.domain.ai.weather.client.tools.Tools
-import com.back.koreaTravelGuide.domain.ai.weather.dto.LandForecastData
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -12,7 +11,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class WeatherApiClient(
     private val restTemplate: RestTemplate,
-    private val tools : Tools,
+    private val tools: Tools,
     private val dataParser: DataParser,
     @Value("\${weather.api.key}") private val serviceKey: String,
     @Value("\${weather.api.base-url}") private val apiUrl: String,

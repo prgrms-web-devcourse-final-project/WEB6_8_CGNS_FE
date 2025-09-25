@@ -16,9 +16,7 @@ class WeatherService(
     private val parser: DtoParser,
 ) {
     @Cacheable("weatherMidFore", key = "#actualRegionCode + '_' + #actualBaseTime")
-    fun fetchMidForecast(
-        actualBaseTime: String,
-    ): List<MidForecastDto>? {
+    fun fetchMidForecast(actualBaseTime: String): List<MidForecastDto>? {
         val prefixes = listOf("11B", "11D1", "11D2", "11C2", "11C1", "11F2", "11F1", "11H1", "11H2", "11G")
         val midForecastList = mutableListOf<MidForecastDto>()
 

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class Tools {
-     fun getStnIdFromRegionCode(regionCode: String): String {
+    fun getStnIdFromRegionCode(regionCode: String): String {
         return when {
             regionCode.startsWith("11B") -> "109" // 서울,인천,경기도
             regionCode.startsWith("11D1") -> "105" // 강원도영서
