@@ -22,8 +22,9 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Void>> {
-        val message = ex.bindingResult.allErrors.filterIsInstance<FieldError>()
-            .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
+        val message =
+            ex.bindingResult.allErrors.filterIsInstance<FieldError>()
+                .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
         logger.warn("입력값 검증 실패: {}", message)
         return ResponseEntity.badRequest().body(ApiResponse("입력값 검증 실패: $message"))
     }
@@ -41,7 +42,10 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleGenericException(ex: Exception, request: HttpServletRequest): ResponseEntity<ApiResponse<Void>> {
+    fun handleGenericException(
+        ex: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<ApiResponse<Void>> {
         logger.error("서버 오류 - {}: {} at {}", ex::class.simpleName, ex.message, request.requestURI, ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse("서버 내부 오류가 발생했습니다"))
     }

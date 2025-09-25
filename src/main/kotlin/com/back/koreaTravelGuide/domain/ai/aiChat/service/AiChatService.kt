@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 class AiChatService(
     private val aiChatMessageRepository: AiChatMessageRepository,
     private val aiChatSessionRepository: AiChatSessionRepository,
-    private val chatClient: ChatClient
+    private val chatClient: ChatClient,
 ) {
     fun getSessions(userId: Long): List<AiChatSession> {
         return aiChatSessionRepository.findByUserIdOrderByCreatedAtDesc(userId)
@@ -25,46 +25,62 @@ class AiChatService(
         return aiChatSessionRepository.save(newSession)
     }
 
-    fun deleteSession(sessionId: Long, userId: Long) {
-        val session = aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-            ?: throw IllegalArgumentException("해당 채팅방이 없거나 삭제 권한이 없습니다.")
+    fun deleteSession(
+        sessionId: Long,
+        userId: Long,
+    ) {
+        val session =
+            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+                ?: throw IllegalArgumentException("해당 채팅방이 없거나 삭제 권한이 없습니다.")
 
         aiChatSessionRepository.deleteById(sessionId)
     }
 
-    fun getSessionMessages(sessionId: Long, userId: Long): List<AiChatMessage> {
-        val session = aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-            ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
+    fun getSessionMessages(
+        sessionId: Long,
+        userId: Long,
+    ): List<AiChatMessage> {
+        val session =
+            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+                ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
 
         return aiChatMessageRepository.findByAiChatSessionIdOrderByCreatedAtAsc(sessionId)
     }
 
-    fun sendMessage(sessionId: Long, userId: Long, message: String): Pair<AiChatMessage, AiChatMessage> {
-        val session = aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-            ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
+    fun sendMessage(
+        sessionId: Long,
+        userId: Long,
+        message: String,
+    ): Pair<AiChatMessage, AiChatMessage> {
+        val session =
+            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+                ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
 
-        val userMessage = AiChatMessage(
-            aiChatSession = session,
-            senderType = SenderType.USER,
-            content = message
-        )
+        val userMessage =
+            AiChatMessage(
+                aiChatSession = session,
+                senderType = SenderType.USER,
+                content = message,
+            )
         val savedUserMessage = aiChatMessageRepository.save(userMessage)
 
-        val response = try {
-            chatClient.prompt()
-                .system(KOREA_TRAVEL_GUIDE_SYSTEM)
-                .user(message)
-                .call()
-                .content() ?: AI_ERROR_FALLBACK
-        } catch (e: Exception) {
-            AI_ERROR_FALLBACK
-        }
+        val response =
+            try {
+                chatClient.prompt()
+                    .system(KOREA_TRAVEL_GUIDE_SYSTEM)
+                    .user(message)
+                    .call()
+                    .content() ?: AI_ERROR_FALLBACK
+            } catch (e: Exception) {
+                AI_ERROR_FALLBACK
+            }
 
-        val aiMessage = AiChatMessage(
-            aiChatSession = session,
-            senderType = SenderType.AI,
-            content = response
-        )
+        val aiMessage =
+            AiChatMessage(
+                aiChatSession = session,
+                senderType = SenderType.AI,
+                content = response,
+            )
         val savedAiMessage = aiChatMessageRepository.save(aiMessage)
         return Pair(savedUserMessage, savedAiMessage)
     }
