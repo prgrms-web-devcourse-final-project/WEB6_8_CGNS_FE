@@ -2,7 +2,7 @@ package com.back.koreaTravelGuide.domain.ai.aiChat.controller
 
 // TODO: 채팅 컨트롤러 - AI 채팅 API 및 SSE 스트리밍 엔드포인트 제공
 import com.back.koreaTravelGuide.domain.ai.aiChat.tool.WeatherTool
-import com.back.koreaTravelGuide.domain.ai.weather.dto.WeatherResponse
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.WeatherResponse
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
