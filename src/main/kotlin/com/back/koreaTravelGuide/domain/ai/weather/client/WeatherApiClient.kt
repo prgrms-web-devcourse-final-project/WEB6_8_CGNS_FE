@@ -72,7 +72,7 @@ class WeatherApiClient(
     fun fetchLandForecast(
         regionId: String,
         baseTime: String,
-    ): PrecipitationData? {
+    ): LandForecastData? {
         val url = "$apiUrl/getMidLandFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
         println("🌧️ 중기육상예보조회 API 호출: $url")
@@ -82,10 +82,10 @@ class WeatherApiClient(
             val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
             println("📡 중기육상예보 JSON 응답 수신")
 
-            jsonResponse?.let { dataParser.parsePrecipitationDataFromJson(it) } ?: PrecipitationData()
+            jsonResponse?.let { dataParser.parsePrecipitationDataFromJson(it) } ?: LandForecastData()
         } catch (e: Exception) {
             println("❌ 중기육상예보조회 JSON API 오류: ${e.message}")
-            PrecipitationData()
+            LandForecastData()
         }
     }
 }

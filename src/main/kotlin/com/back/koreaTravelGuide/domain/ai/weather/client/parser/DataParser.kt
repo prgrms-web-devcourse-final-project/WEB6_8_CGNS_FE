@@ -1,5 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.weather.client.parser
 
+import com.back.koreaTravelGuide.domain.ai.weather.dto.LandForecastData
+import com.back.koreaTravelGuide.domain.ai.weather.dto.LandForecastInfo
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureData
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureInfo
 import org.springframework.stereotype.Component
@@ -35,8 +37,8 @@ class DataParser {
     }
 
     // 기온 데이터 JSON 파싱
-    fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
-        val TemperatureData = TemperatureData()
+     fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
+        val temperatureData = TemperatureData()
 
         for (day in 4..10) {
             val minTemp = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMin$day") as? Number)?.toInt()
@@ -55,16 +57,16 @@ class DataParser {
                         maxTempRange = if (maxTempLow != null && maxTempHigh != null) "$maxTempLow~$maxTempHigh℃" else null,
                     )
 
-                TemperatureData.setDay(day, tempInfo)
+                temperatureData.setDay(day, tempInfo)
             }
         }
 
-        return TemperatureData
+        return temperatureData
     }
 
     // 강수 확률 데이터 JSON 파싱
-    fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): PrecipitationData {
-        val precipitationData = PrecipitationData()
+     fun parsePrecipitationDataFromJson(jsonResponse: Map<String, Any>): LandForecastData {
+        val landForecastData = LandForecastData()
 
         for (day in 4..10) {
             if (day <= 7) {
@@ -76,14 +78,14 @@ class DataParser {
 
                 if (amRain != null || pmRain != null || !amWeather.isNullOrBlank() || !pmWeather.isNullOrBlank()) {
                     val precipInfo =
-                        PrecipitationInfo(
+                        LandForecastInfo(
                             amRainPercent = amRain,
                             pmRainPercent = pmRain,
                             amWeather = amWeather,
                             pmWeather = pmWeather,
                         )
 
-                    precipitationData.setDay(day, precipInfo)
+                    landForecastData.setDay(day, precipInfo)
                 }
             } else {
                 // 8~10일: 통합 (오전/오후 구분 없음)
@@ -92,18 +94,18 @@ class DataParser {
 
                 if (rainPercent != null || !weather.isNullOrBlank()) {
                     val precipInfo =
-                        PrecipitationInfo(
+                        LandForecastInfo(
                             amRainPercent = rainPercent,
                             pmRainPercent = null,
                             amWeather = weather,
                             pmWeather = null,
                         )
 
-                    precipitationData.setDay(day, precipInfo)
+                    landForecastData.setDay(day, precipInfo)
                 }
             }
         }
 
-        return precipitationData
+        return landForecastData
     }
 }

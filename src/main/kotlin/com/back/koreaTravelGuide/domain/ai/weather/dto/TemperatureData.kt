@@ -4,22 +4,19 @@ import kotlin.text.set
 
 // TODO: 날씨 내부 데이터 구조 - 기상청 API 응답 데이터 매핑용 내부 클래스들
 @Suppress("unused") // JSON 직렬화를 위해 필요
-data class TemperatureData(
+class TemperatureData(
     private val days: MutableMap<Int, TemperatureInfo?> = mutableMapOf(),
 ) {
-    fun setDay(
-        day: Int,
-        info: TemperatureInfo?,
-    ) {
-        days[day] set info
+    fun setDay(day: Int, info: TemperatureInfo?, ) {
+        days[day] = info
     }
 
     fun getDay(day: Int): TemperatureInfo? = days[day]
 
-    var day4: TemperatureInfo? get() = days[4]
-        set(value) {
-            days[4] set value
-        }
+    var day4: TemperatureInfo?
+        get() = days[4]
+        set(value) { days[4] = value }
+
     var day5: TemperatureInfo? get() = days[5]
         set(value) {
             days[5] set value
