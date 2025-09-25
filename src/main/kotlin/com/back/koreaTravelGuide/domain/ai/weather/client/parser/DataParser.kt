@@ -106,6 +106,8 @@ class DataParser {
             }
         }
 
+
+
         return landForecastData
     }
 }
