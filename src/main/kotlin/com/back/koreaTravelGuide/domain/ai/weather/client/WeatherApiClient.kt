@@ -1,10 +1,11 @@
 package com.back.koreaTravelGuide.domain.ai.weather.client
 
 // TODO: 기상청 API 클라이언트 - HTTP 요청으로 날씨 데이터 조회 및 JSON 파싱
-import com.back.koreaTravelGuide.domain.ai.weather.dto.PrecipitationData
-import com.back.koreaTravelGuide.domain.ai.weather.dto.PrecipitationInfo
-import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureData
-import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureInfo
+import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureDto
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.PrecipitationData
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.PrecipitationInfo
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.TemperatureData
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.TemperatureInfo
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -50,7 +51,7 @@ class WeatherApiClient(
     fun fetchTemperature(
         regionId: String,
         baseTime: String,
-    ): TemperatureData? {
+    ): TemperatureDto? {
         val url = "$apiUrl/getMidTa?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
         println("🌡️ 중기기온조회 API 호출: $url")
@@ -60,10 +61,10 @@ class WeatherApiClient(
             val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
             println("📡 중기기온 JSON 응답 수신")
 
-            jsonResponse?.let { parseTemperatureDataFromJson(it) } ?: TemperatureData()
+            jsonResponse?.let { parseTemperatureDataFromJson(it) } ?: TemperatureDto()
         } catch (e: Exception) {
             println("❌ 중기기온조회 JSON API 오류: ${e.message}")
-            TemperatureData()
+            TemperatureDto()
         }
     }
 

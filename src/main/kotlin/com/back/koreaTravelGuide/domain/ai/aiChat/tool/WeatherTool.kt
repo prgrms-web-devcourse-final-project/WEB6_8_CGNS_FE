@@ -1,9 +1,9 @@
 package com.back.koreaTravelGuide.domain.ai.aiChat.tool
 
 // TODO: AI 날씨 도구 - Spring AI @Tool 어노테이션으로 AI가 호출할 수 있는 날씨 기능
-import com.back.koreaTravelGuide.domain.ai.weather.dto.MidTermMetricsResult
-import com.back.koreaTravelGuide.domain.ai.weather.dto.MidTermNarrativeResult
-import com.back.koreaTravelGuide.domain.ai.weather.dto.WeatherResponse
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.MidTermMetricsResult
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.MidTermNarrativeResult
+import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.WeatherResponse
 import com.back.koreaTravelGuide.domain.ai.weather.service.WeatherService
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
