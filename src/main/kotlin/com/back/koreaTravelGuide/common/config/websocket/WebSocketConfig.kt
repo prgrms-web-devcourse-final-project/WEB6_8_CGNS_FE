@@ -1,4 +1,4 @@
-package com.back.koreaTravelGuide.common.config
+package com.back.koreaTravelGuide.common.config.websocket
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
@@ -8,10 +8,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-class WebSocketConfig : WebSocketMessageBrokerConfigurer {
+class WebSocketConfig(
+    private val jwtHandshakeInterceptor: JwtHandshakeInterceptor,
+) : WebSocketMessageBrokerConfigurer {
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry.addEndpoint("/ws/chat")
-            .addInterceptors(JwtHandsshakeInterceptor) // JWT 체크
+            .addInterceptors(JwtHandshakeInterceptor()) // JWT 체크
             .setAllowedOrigins("*")
             .withSockJS() // 개발 중 호환성
     }
