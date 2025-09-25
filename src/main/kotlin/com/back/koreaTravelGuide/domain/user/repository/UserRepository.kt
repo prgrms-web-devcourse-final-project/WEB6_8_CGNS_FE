@@ -1,4 +1,18 @@
 package com.back.koreaTravelGuide.domain.user.repository
 
-// TODO: 사용자 리포지토리 - 사용자 데이터 저장/조회 (향후 구현)
-interface UserRepository
+import com.back.koreaTravelGuide.domain.user.entity.User
+import com.back.koreaTravelGuide.domain.user.enums.UserRole
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface UserRepository : JpaRepository<User, Long> {
+    fun findByOauthProviderAndOauthId(
+        oauthProvider: String,
+        oauthId: String,
+    ): User?
+
+    fun findByEmail(email: String): User?
+
+    fun findByRole(role: UserRole): List<User>
+}
