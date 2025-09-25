@@ -8,6 +8,7 @@ import com.back.koreaTravelGuide.domain.ai.aiChat.entity.SenderType
 import com.back.koreaTravelGuide.domain.ai.aiChat.repository.AiChatMessageRepository
 import com.back.koreaTravelGuide.domain.ai.aiChat.repository.AiChatSessionRepository
 import org.springframework.ai.chat.client.ChatClient
+import org.springframework.ai.chat.memory.ChatMemory
 import org.springframework.stereotype.Service
 
 @Service
@@ -69,6 +70,9 @@ class AiChatService(
                 chatClient.prompt()
                     .system(KOREA_TRAVEL_GUIDE_SYSTEM)
                     .user(message)
+                    .advisors { advisor ->
+                        advisor.param(ChatMemory.CONVERSATION_ID, sessionId.toString())
+                    }
                     .call()
                     .content() ?: AI_ERROR_FALLBACK
             } catch (e: Exception) {
