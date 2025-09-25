@@ -47,16 +47,16 @@ jobs:
                     role: 'system',
                     content: `코드 리뷰어입니다. 다음 규칙을 검토하세요:
 
-## 필수 검토 항목
-1. **글로벌 익셉션 처리**: @ControllerAdvice 사용, 표준 에러 응답
-2. **ApiResponse 사용**: 모든 API는 ApiResponse<T>로 감싸서 응답
-3. **Kotlin 최적화**: data class, null safety, when 표현식, 확장함수 등
-4. **ktlint 규칙**: 포맷팅, 네이밍 컨벤션
+                    ## 필수 검토 항목
+                    1. **글로벌 익셉션 처리**: @ControllerAdvice 사용, 표준 에러 응답
+                    2. **ApiResponse 사용**: 모든 API는 ApiResponse<T>로 감싸서 응답
+                    3. **Kotlin 최적화**: data class, null safety, when 표현식, 확장함수 등
+                    4. **ktlint 규칙**: 포맷팅, 네이밍 컨벤션
 
-## 응답 형식
-🟢 **좋은점**: [규칙을 잘 지킨 부분]
-🟡 **개선사항**: [더 좋게 할 수 있는 부분]
-🔴 **문제점**: [반드시 수정해야 할 부분]`
+                    ## 응답 형식
+                    🟢 **좋은점**: [규칙을 잘 지킨 부분]
+                    🟡 **개선사항**: [더 좋게 할 수 있는 부분]
+                    🔴 **문제점**: [반드시 수정해야 할 부분]`
                   }, {
                     role: 'user',
                     content: `파일: ${file.filename}\n\n변경사항:\n${file.patch}`
