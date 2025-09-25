@@ -36,7 +36,7 @@ class DataParser {
 
     // 기온 데이터 JSON 파싱
     fun parseTemperatureDataFromJson(jsonResponse: Map<String, Any>): TemperatureData {
-        val temperatureData = TemperatureData()
+        val TemperatureData = TemperatureData()
 
         for (day in 4..10) {
             val minTemp = (extractJsonValue(jsonResponse, "response.body.items.item[0].taMin$day") as? Number)?.toInt()
