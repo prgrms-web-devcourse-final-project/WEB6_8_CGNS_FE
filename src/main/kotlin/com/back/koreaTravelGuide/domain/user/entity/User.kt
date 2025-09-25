@@ -35,10 +35,8 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var role: UserRole = UserRole.USER,
-    // GUIDE
     @Column
     var location: String? = null,
-    // GUIDE
     @Column(columnDefinition = "TEXT")
     var description: String? = null,
     @CreatedDate
