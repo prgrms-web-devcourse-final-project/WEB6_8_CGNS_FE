@@ -4,7 +4,7 @@ package com.back.koreaTravelGuide.domain.ai.weather.service
 import com.back.koreaTravelGuide.domain.ai.weather.client.WeatherApiClient
 import com.back.koreaTravelGuide.domain.ai.weather.dto.MidForecastDto
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureAndLandForecastDto
-import com.back.koreaTravelGuide.domain.weather.dto.parser.Parser
+import com.back.koreaTravelGuide.domain.weather.dto.parser.DtoParser
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.scheduling.annotation.Scheduled
@@ -13,18 +13,23 @@ import org.springframework.stereotype.Service
 @Service
 class WeatherService(
     private val weatherApiClient: WeatherApiClient,
-    private val parser: Parser,
+    private val parser: DtoParser,
 ) {
     @Cacheable("weatherMidFore", key = "#actualRegionCode + '_' + #actualBaseTime")
     fun fetchMidForecast(
-        actualRegionCode: String,
         actualBaseTime: String,
-    ): MidForecastDto? {
-        val info = weatherApiClient.fetchMidForecast(actualRegionCode, actualBaseTime)
+    ): List<MidForecastDto>? {
+        val prefixes = listOf("11B", "11D1", "11D2", "11C2", "11C1", "11F2", "11F1", "11H1", "11H2", "11G")
+        val midForecastList = mutableListOf<MidForecastDto>()
 
-        if (info.isNullOrBlank()) return null
+        for (regionId in prefixes) {
+            val info = weatherApiClient.fetchMidForecast(regionId, actualBaseTime)
+            if (info.isNullOrBlank()) return null
 
-        return parser.parseMidForecast(actualRegionCode, actualBaseTime, info)
+            val dto = parser.parseMidForecast(regionId, actualBaseTime, info)
+            midForecastList.add(dto)
+        }
+        return midForecastList
     }
 
     @Cacheable("weatherTempAndLandFore", key = "#actualRegionCode + '_' + #actualBaseTime")
