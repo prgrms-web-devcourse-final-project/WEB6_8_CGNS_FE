@@ -46,6 +46,12 @@ class GlobalExceptionHandler {
         ex: Exception,
         request: HttpServletRequest,
     ): ResponseEntity<ApiResponse<Void>> {
+        // Static resource 예외는 무시 (favicon.ico, CSS, JS 등)
+        if (ex is org.springframework.web.servlet.resource.NoResourceFoundException) {
+            logger.debug("Static resource not found: {} at {}", ex.message, request.requestURI)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse("리소스를 찾을 수 없습니다"))
+        }
+
         logger.error("서버 오류 - {}: {} at {}", ex::class.simpleName, ex.message, request.requestURI, ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse("서버 내부 오류가 발생했습니다"))
     }

@@ -5,6 +5,7 @@ import com.back.koreaTravelGuide.security.CustomOAuth2UserService
 import com.back.koreaTravelGuide.security.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -16,35 +17,59 @@ class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val customOAuth2LoginSuccessHandler: CustomOAuth2LoginSuccessHandler,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val environment: Environment,
 ) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        val isDev = environment.activeProfiles.contains("dev")
+
         http {
-            // 기본 보안 기능
             csrf { disable() }
             formLogin { disable() }
             httpBasic { disable() }
             logout { disable() }
 
-            sessionManagement {
-                sessionCreationPolicy = SessionCreationPolicy.STATELESS
+            headers {
+                if (isDev) {
+                    frameOptions { disable() }
+                } else {
+                    frameOptions { sameOrigin }
+                }
             }
 
-            oauth2Login {
-                userInfoEndpoint {
-                    userService = customOAuth2UserService
+            sessionManagement {
+                sessionCreationPolicy =
+                    if (isDev) {
+                        SessionCreationPolicy.IF_REQUIRED
+                    } else {
+                        SessionCreationPolicy.STATELESS
+                    }
+            }
+
+            if (!isDev) {
+                oauth2Login {
+                    userInfoEndpoint {
+                        userService = customOAuth2UserService
+                    }
+                    authenticationSuccessHandler = customOAuth2LoginSuccessHandler
                 }
-                authenticationSuccessHandler = customOAuth2LoginSuccessHandler
             }
 
             authorizeHttpRequests {
-                authorize("/api/auth/**", permitAll)
-                authorize("/swagger-ui/**", "/v3/api-docs/**", permitAll)
                 authorize("/h2-console/**", permitAll)
+                authorize("/swagger-ui/**", "/v3/api-docs/**", permitAll)
+                authorize("/api/auth/**", permitAll)
                 authorize("/favicon.ico", permitAll)
-                authorize(anyRequest, authenticated)
+                if (isDev) {
+                    authorize(anyRequest, permitAll)
+                } else {
+                    authorize(anyRequest, authenticated)
+                }
             }
-            addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+
+            if (!isDev) {
+                addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            }
         }
 
         return http.build()

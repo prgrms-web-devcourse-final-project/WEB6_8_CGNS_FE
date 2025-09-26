@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: dev
+  config:
+    import: "optional:file:.env[.properties]"
 
   # Spring AI 1.0.0-M6 설정 (OpenRouter 사용)
   ai:
@@ -14,7 +16,7 @@ spring:
 
   # 개발용 H2 Database 설정 (주니어 개발자용)
   datasource:
-    url: jdbc:h2:mem:korea_travel_guide
+    url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
     password: ""
@@ -33,6 +35,11 @@ spring:
     properties:
       hibernate:
         format_sql: true # SQL 포맷팅
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:org/springframework/ai/chat/memory/repository/jdbc/schema-h2.sql
 
   # WebSocket 설정 (Guest-Guide 채팅용)
   websocket:
@@ -63,6 +70,12 @@ spring:
   session:
     store-type: none  # Redis 없어도 실행 가능하도록 변경
     timeout: 30m
+
+  # Redis 자동 설정 비활성화 (세션 비활성화용)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
           
 # Swagger API 문서 설정 (주니어 개발자용)
 springdoc:
@@ -78,6 +91,12 @@ weather:
   api:
     key: ${WEATHER_API_KEY}
     base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
+
+# Tour API 설정
+tour:
+  api:
+    key: ${TOUR_API_KEY:dev-tour-api-key-placeholder}
+    base-url: ${TOUR_API_BASE_URL:http://apis.data.go.kr/B551011/KorService1}
 
 
 # 로깅 설정 (주니어 개발자 디버깅용)
@@ -111,4 +130,5 @@ management:
 
 # JWT 설정
 jwt:
-  secret-key: ${CUSTOM__JWT__SECRET_KEY}
+  secret-key: ${CUSTOM__JWT__SECRET_KEY:dev-secret-key-for-local-testing-please-change}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:60}

@@ -44,7 +44,7 @@ class DevConfig {
             println("   📊 Actuator Info: $baseUrl/actuator/info")
 
             println("\n🔧 데이터베이스 접속 정보 (H2 Console용):")
-            println("   JDBC URL: jdbc:h2:mem:korea_travel_guide")
+            println("   JDBC URL: jdbc:h2:mem:testdb")
             println("   Username: sa")
             println("   Password: (비어있음)")
 
