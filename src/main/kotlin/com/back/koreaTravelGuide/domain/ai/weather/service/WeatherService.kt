@@ -34,13 +34,13 @@ class WeatherService(
     fun fetchTemperatureAndLandForecast(
         actualRegionCode: String,
         actualBaseTime: String,
-    ): TemperatureAndLandForecastDto? {
+    ): List<TemperatureAndLandForecastDto>? {
         val tempInfo = weatherApiClient.fetchTemperature(actualRegionCode, actualBaseTime)
         val landInfo = weatherApiClient.fetchLandForecast(actualRegionCode, actualBaseTime)
 
         if (tempInfo == null || landInfo == null) return null
 
-        return parser.parseTemperatureAndLandForecast(tempInfo, landInfo)
+        return parser.parseTemperatureAndLandForecast(actualRegionCode, actualBaseTime, tempInfo, landInfo)
     }
 
     @CacheEvict(cacheNames = ["weatherMidFore", "weatherTempAndLandFore"], allEntries = true)

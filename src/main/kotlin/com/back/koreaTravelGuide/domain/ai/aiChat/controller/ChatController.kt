@@ -117,7 +117,7 @@ class ChatController(
         return emitter
     }
 
-// 날씨 API 직접 테스트용 엔드포인트
+    // 날씨 API 직접 테스트용 엔드포인트
     @GetMapping("/weather/test")
     fun testWeather(
         @RequestParam(required = false) baseTime: String?,

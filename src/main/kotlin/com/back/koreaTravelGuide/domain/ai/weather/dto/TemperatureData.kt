@@ -2,7 +2,7 @@ package com.back.koreaTravelGuide.domain.ai.weather.dto
 
 // TODO: 날씨 내부 데이터 구조 - 기상청 API 응답 데이터 매핑용 내부 클래스들
 @Suppress("unused") // JSON 직렬화를 위해 필요
-class TemperatureData(
+data class TemperatureData(
     private val days: MutableMap<Int, TemperatureInfo?> = mutableMapOf(),
 ) {
     fun setDay(

@@ -1,7 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.weather.dto
 
 @Suppress("unused") // JSON 직렬화를 위해 필요
-class LandForecastData(
+data class LandForecastData(
     private val days: MutableMap<Int, LandForecastInfo?> = mutableMapOf(),
 ) {
     fun setDay(

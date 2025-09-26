@@ -1,5 +1,3 @@
-package com.back.koreaTravelGuide.application
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.cdimascio.dotenv.dotenv
 import org.junit.jupiter.api.BeforeAll

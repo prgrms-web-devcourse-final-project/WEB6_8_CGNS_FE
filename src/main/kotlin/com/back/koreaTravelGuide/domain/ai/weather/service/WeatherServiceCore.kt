@@ -22,7 +22,7 @@ class WeatherServiceCore(
         location: String?,
         regionCode: String?,
         baseTime: String?,
-    ): TemperatureAndLandForecastDto? {
+    ): List<TemperatureAndLandForecastDto>? {
         val actualLocation = location ?: "서울"
         val actualRegionCode = regionCode ?: tools.getRegionCodeFromLocation(actualLocation)
 
