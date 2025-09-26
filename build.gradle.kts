@@ -34,6 +34,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // jwt
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
     // Spring AI - 1.1.0-M2 (최신 버전) - 새로운 artifact명
     implementation("org.springframework.ai:spring-ai-starter-model-openai:1.1.0-M2")
     // Spring AI - JDBC 채팅 메모리 저장소 (PostgreSQL 대화 기록 저장)
