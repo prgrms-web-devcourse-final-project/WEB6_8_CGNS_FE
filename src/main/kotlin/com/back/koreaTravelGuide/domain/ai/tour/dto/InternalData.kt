@@ -7,14 +7,14 @@ package com.back.koreaTravelGuide.domain.ai.tour.dto
  */
 
 data class InternalData(
-    // 한 페이지 데이터 수, 미 입력시 10
+    // 한 페이지 데이터 수, 10으로 지정
     val numOfRows: Int = 10,
-    // 페이지 번호, 미 입력시 10
+    // 페이지 번호, 1로 지정
     val pageNo: Int = 1,
-    // 관광타입 ID, 미 입력시 전체 조회 (12:관광지, 38 : 쇼핑...), 우선 관광지로 하드코딩
-    val contentTypeId: String = "12",
-    // 지역코드, 미 입력시 지역 전체 (1:서울, 2:인천...)
-    val areaCode: String,
-    // 시군구코드, 미 입력시 전체
-    val sigunguCode: String,
+    // 관광타입 ID, 미 입력시 전체 조회 (12:관광지, 38 : 쇼핑...),
+    val contentTypeId: String? = "",
+    // 지역코드, 미 입력시 지역 전체 조회 (1:서울, 2:인천...)
+    val areaCode: String? = "",
+    // 시군구코드, 미 입력시 전체 조회
+    val sigunguCode: String? = "",
 )
