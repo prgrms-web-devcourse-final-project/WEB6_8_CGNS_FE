@@ -56,11 +56,48 @@ class DtoParser {
     }
 
     fun parseTemperatureAndLandForecast(
+        regionCode: String,
+        baseTime: String,
         temperatureData: TemperatureData,
         landForecastData: LandForecastData,
-    ): TemperatureAndLandForecastDto {
-        return TemperatureAndLandForecastDto(
-            "a",
-        )
+    ): List<TemperatureAndLandForecastDto> {
+        val resultList = mutableListOf<TemperatureAndLandForecastDto>()
+
+        for(i in 4..10) {
+            val tempInfo = temperatureData.getDay(i)
+            val landInfo = landForecastData.getDay(i)
+
+            if (tempInfo == null || landInfo == null) {
+                continue
+            }
+
+            val minTemp = tempInfo.minTemp
+            val maxTemp = tempInfo.maxTemp
+            val minTempRange = tempInfo.minTempRange
+            val maxTempRange = tempInfo.maxTempRange
+
+            val amRainPercent = landInfo.amRainPercent
+            val pmRainPercent = landInfo.pmRainPercent
+            val amWeather = landInfo.amWeather
+            val pmWeather = landInfo.pmWeather
+
+            // 각 날짜별로 필요한 처리를 수행합니다.
+            val dto = TemperatureAndLandForecastDto(
+                regionCode = regionCode,
+                baseTime = baseTime,
+                minTemp = minTemp,
+                maxTemp = maxTemp,
+                minTempRange = minTempRange,
+                maxTempRange = maxTempRange,
+                amRainPercent = amRainPercent,
+                pmRainPercent = pmRainPercent,
+                amWeather = amWeather,
+                pmWeather = pmWeather,
+            )
+
+            resultList.add(dto)
+        }
+
+        return resultList
     }
 }

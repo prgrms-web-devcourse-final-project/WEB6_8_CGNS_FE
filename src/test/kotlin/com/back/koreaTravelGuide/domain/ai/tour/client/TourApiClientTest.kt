@@ -1,6 +1,6 @@
 package com.back.koreaTravelGuide.domain.ai.tour.client
 
-import com.back.koreaTravelGuide.application.KoreaTravelGuideApplication
+import com.back.koreaTravelGuide.KoreaTravelGuideApplication
 import com.back.koreaTravelGuide.domain.ai.tour.dto.InternalData
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
 import com.fasterxml.jackson.databind.ObjectMapper
