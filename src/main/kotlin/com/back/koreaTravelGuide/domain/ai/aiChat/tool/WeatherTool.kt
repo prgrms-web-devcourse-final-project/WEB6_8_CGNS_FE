@@ -37,7 +37,7 @@ class WeatherTool(
 //        @ToolParam(description = "중기예보 regId 배열 (예: [\"11B10101\", \"11H20301\"]).", required = true) regionCodes: List<String>,
         @ToolParam(description = "발표 시각 (YYYYMMDDHHMM). 미지정 시 최근 발표시각 사용.", required = false) baseTime: String?,
 //        @ToolParam(description = "확인할 일 수 offset 목록 (4~10). 비워 두면 4~10일 모두 반환.", required = false) days: List<Int>?,
-    ): TemperatureAndLandForecastDto? {
+    ): List<TemperatureAndLandForecastDto>? {
         return weatherServiceCore.getTemperatureAndLandForecast(
             location = location,
             regionCode = regionCode,
