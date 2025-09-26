@@ -8,13 +8,18 @@ package com.back.koreaTravelGuide.domain.ai.tour.dto
 
 data class InternalData(
     // 한 페이지 데이터 수, 10으로 지정
-    val numOfRows: Int = 10,
+    val numOfRows: Int = DEFAULT_ROWS,
     // 페이지 번호, 1로 지정
-    val pageNo: Int = 1,
+    val pageNo: Int = DEFAULT_PAGE,
     // 관광타입 ID, 미 입력시 전체 조회 (12:관광지, 38 : 쇼핑...),
     val contentTypeId: String? = "",
     // 지역코드, 미 입력시 지역 전체 조회 (1:서울, 2:인천...)
     val areaCode: String? = "",
     // 시군구코드, 미 입력시 전체 조회
     val sigunguCode: String? = "",
-)
+) {
+    companion object {
+        const val DEFAULT_ROWS = 10
+        const val DEFAULT_PAGE = 1
+    }
+}
