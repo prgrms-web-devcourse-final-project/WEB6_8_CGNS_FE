@@ -22,7 +22,7 @@ class AiChatService(
     }
 
     fun createSession(userId: Long): AiChatSession {
-        val newSession = AiChatSession(userId = userId)
+        val newSession = AiChatSession(userId = userId, sessionTitle = "새로운 채팅방")
         return aiChatSessionRepository.save(newSession)
     }
 
@@ -30,9 +30,7 @@ class AiChatService(
         sessionId: Long,
         userId: Long,
     ) {
-        val session =
-            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-                ?: throw IllegalArgumentException("해당 채팅방이 없거나 삭제 권한이 없습니다.")
+        val session = getSessionWithOwnershipCheck(sessionId, userId)
 
         aiChatSessionRepository.deleteById(sessionId)
     }
@@ -41,9 +39,7 @@ class AiChatService(
         sessionId: Long,
         userId: Long,
     ): List<AiChatMessage> {
-        val session =
-            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-                ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
+        val session = getSessionWithOwnershipCheck(sessionId, userId)
 
         return aiChatMessageRepository.findByAiChatSessionIdOrderByCreatedAtAsc(sessionId)
     }
@@ -53,9 +49,7 @@ class AiChatService(
         userId: Long,
         message: String,
     ): Pair<AiChatMessage, AiChatMessage> {
-        val session =
-            aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
-                ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
+        val session = getSessionWithOwnershipCheck(sessionId, userId)
 
         val userMessage =
             AiChatMessage(
@@ -64,6 +58,10 @@ class AiChatService(
                 content = message,
             )
         val savedUserMessage = aiChatMessageRepository.save(userMessage)
+
+        if (aiChatMessageRepository.countByAiChatSessionId(sessionId) == 1L) {
+            aiUpdateSessionTitle(session, message)
+        }
 
         val response =
             try {
@@ -87,5 +85,48 @@ class AiChatService(
             )
         val savedAiMessage = aiChatMessageRepository.save(aiMessage)
         return Pair(savedUserMessage, savedAiMessage)
+    }
+
+    fun updateSessionTitle(
+        sessionId: Long,
+        userId: Long,
+        newTitle: String,
+    ): AiChatSession {
+        val session = getSessionWithOwnershipCheck(sessionId, userId)
+        session.sessionTitle = newTitle.trim().take(100)
+        return aiChatSessionRepository.save(session)
+    }
+
+    /**
+     * AiChatService 내 헬퍼 메서드들을 정의합니다.
+     *
+     * aiUpdateSessionTitle - AI를 사용하여 기본 채팅방 제목을 업데이트합니다.
+     *
+     * checkSessionOwnership - 세션 소유권을 확인합니다.
+     */
+    private fun aiUpdateSessionTitle(
+        session: AiChatSession,
+        userMessage: String,
+    ) {
+        val newTitle =
+            try {
+                chatClient.prompt()
+                    .system("사용자의 채팅방 제목을 메시지를 요약해서 해당 사용자의 언어로 간결하게 만들어줘.")
+                    .user(userMessage)
+                    .call()
+                    .content() ?: session.sessionTitle
+            } catch (e: Exception) {
+                session.sessionTitle
+            }
+        session.sessionTitle = newTitle.take(100)
+        aiChatSessionRepository.save(session)
+    }
+
+    private fun getSessionWithOwnershipCheck(
+        sessionId: Long,
+        userId: Long,
+    ): AiChatSession {
+        return aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+            ?: throw IllegalArgumentException("해당 채팅방이 없거나 접근 권한이 없습니다.")
     }
 }

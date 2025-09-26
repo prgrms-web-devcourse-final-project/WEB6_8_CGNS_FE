@@ -18,8 +18,8 @@ class AiChatSession(
     val id: Long? = null,
     @Column(name = "user_id", nullable = false)
     val userId: Long,
-    @Column(name = "session_title", nullable = true, length = 100)
-    var sessionTitle: String? = null,
+    @Column(name = "session_title", nullable = false, length = 100)
+    var sessionTitle: String,
     @Column(name = "created_at", nullable = false)
     val createdAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
 )

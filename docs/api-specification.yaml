@@ -521,6 +521,50 @@ paths:
                           aiMessage:
                             $ref: '#/components/schemas/AiChatMessage'
 
+  /api/aichat/sessions/{sessionId}/title:
+    patch:
+      tags:
+        - aichat
+      summary: AI 채팅 세션 제목 수정
+      description: AI 채팅 세션의 제목을 사용자가 직접 수정합니다
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: AI 채팅 세션 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  maxLength: 100
+                  description: 새로운 세션 제목
+      responses:
+        '200':
+          description: 제목 수정 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AiChatSession'
+        '404':
+          description: 세션을 찾을 수 없음
+        '403':
+          description: 권한 없음
+
   # ===================
   # User Chat Domain APIs
   # ===================
