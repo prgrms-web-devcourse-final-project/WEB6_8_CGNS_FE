@@ -2,7 +2,7 @@ package com.back.koreaTravelGuide.domain.ai.aiChat.controller
 
 // TODO: 채팅 컨트롤러 - AI 채팅 API 및 SSE 스트리밍 엔드포인트 제공
 import com.back.koreaTravelGuide.domain.ai.aiChat.tool.WeatherTool
-import com.back.koreaTravelGuide.domain.ai.weather.dto.remove.WeatherResponse
+import com.back.koreaTravelGuide.domain.ai.weather.dto.MidForecastDto
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -117,40 +117,36 @@ class ChatController(
         return emitter
     }
 
-    // 날씨 API 직접 테스트용 엔드포인트
+// 날씨 API 직접 테스트용 엔드포인트
     @GetMapping("/weather/test")
     fun testWeather(
-        @RequestParam(required = false) location: String?,
-        @RequestParam(required = false) regionCode: String?,
         @RequestParam(required = false) baseTime: String?,
-    ): WeatherResponse {
-        return weatherTool.getWeatherForecast(
-            location = location,
-            regionCode = regionCode,
+    ): List<MidForecastDto>? {
+        return weatherTool.queryMidTermNarrative(
             baseTime = baseTime,
         )
     }
 
     // 지역별 날씨 간단 조회
-    @GetMapping("/weather/simple")
-    fun simpleWeather(
-        @RequestParam(defaultValue = "서울") location: String,
-    ): String {
-        val response =
-            weatherTool.getWeatherForecast(
-                location = location,
-                regionCode = null,
-                baseTime = null,
-            )
-
-        return """
-            |지역: ${response.region}
-            |지역코드: ${response.regionCode}
-            |발표시각: ${response.baseTime}
-            |
-            |${response.forecast}
-            """.trimMargin()
-    }
+//    @GetMapping("/weather/simple")
+//    fun simpleWeather(
+//        @RequestParam(defaultValue = "서울") location: String,
+//    ): String {
+//        val response =
+//            weatherTool.getWeatherForecast(
+//                location = location,
+//                regionCode = null,
+//                baseTime = null,
+//            )
+//
+//        return """
+//            |지역: ${response.region}
+//            |지역코드: ${response.regionCode}
+//            |발표시각: ${response.baseTime}
+//            |
+//            |${response.forecast}
+//            """.trimMargin()
+//    }
 
     // 현재 서버 시간 확인용 엔드포인트
     @GetMapping("/time/current")
@@ -164,37 +160,37 @@ class ChatController(
     }
 
     // 원시 XML 응답 확인용 엔드포인트
-    @GetMapping("/weather/debug")
-    fun debugWeatherApi(
-        @RequestParam(defaultValue = "서울") location: String,
-        @RequestParam(required = false) regionCode: String?,
-        @RequestParam(required = false) baseTime: String?,
-    ): Map<String, Any?> {
-        return try {
-            println("🚀 디버그 API 호출 시작 - location: $location")
-            val response =
-                weatherTool.getWeatherForecast(
-                    location = location,
-                    regionCode = regionCode,
-                    baseTime = baseTime,
-                )
-
-            mapOf(
-                "success" to true,
-                "location" to location,
-                "regionCode" to (regionCode ?: "자동변환"),
-                "baseTime" to (baseTime ?: "자동계산"),
-                "response" to response,
-                "hasData" to (response.details.day4 != null || response.details.day5 != null),
-                "message" to "디버그 정보가 콘솔에 출력되었습니다.",
-            )
-        } catch (e: Exception) {
-            mapOf(
-                "success" to false,
-                "error" to (e.message ?: "알 수 없는 오류"),
-                "location" to location,
-                "message" to "오류 발생: ${e.message ?: "알 수 없는 오류"}",
-            )
-        }
-    }
+//    @GetMapping("/weather/debug")
+//    fun debugWeatherApi(
+//        @RequestParam(defaultValue = "서울") location: String,
+//        @RequestParam(required = false) regionCode: String?,
+//        @RequestParam(required = false) baseTime: String?,
+//    ): Map<String, Any?> {
+//        return try {
+//            println("🚀 디버그 API 호출 시작 - location: $location")
+//            val response =
+//                weatherTool.getWeatherForecast(
+//                    location = location,
+//                    regionCode = regionCode,
+//                    baseTime = baseTime,
+//                )
+//
+//            mapOf(
+//                "success" to true,
+//                "location" to location,
+//                "regionCode" to (regionCode ?: "자동변환"),
+//                "baseTime" to (baseTime ?: "자동계산"),
+//                "response" to response,
+//                "hasData" to (response.details.day4 != null || response.details.day5 != null),
+//                "message" to "디버그 정보가 콘솔에 출력되었습니다.",
+//            )
+//        } catch (e: Exception) {
+//            mapOf(
+//                "success" to false,
+//                "error" to (e.message ?: "알 수 없는 오류"),
+//                "location" to location,
+//                "message" to "오류 발생: ${e.message ?: "알 수 없는 오류"}",
+//            )
+//        }
+//    }
 }

@@ -5,7 +5,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-@Component
+@Component("serviceTools")
 open class Tools {
     fun getRegionCodeFromLocation(location: String): String {
         return REGION_MAP[location] ?: "11B10101"
