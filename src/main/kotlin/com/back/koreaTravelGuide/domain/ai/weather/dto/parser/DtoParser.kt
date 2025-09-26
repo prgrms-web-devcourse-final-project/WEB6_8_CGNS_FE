@@ -59,6 +59,8 @@ class DtoParser {
         temperatureData: TemperatureData,
         landForecastData: LandForecastData,
     ): TemperatureAndLandForecastDto {
-        return TemperatureAndLandForecastDto()
+        return TemperatureAndLandForecastDto(
+            "a",
+        )
     }
 }
