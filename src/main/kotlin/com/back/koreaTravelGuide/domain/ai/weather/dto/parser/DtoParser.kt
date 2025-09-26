@@ -63,7 +63,7 @@ class DtoParser {
     ): List<TemperatureAndLandForecastDto> {
         val resultList = mutableListOf<TemperatureAndLandForecastDto>()
 
-        for(i in 4..10) {
+        for (i in 4..10) {
             val tempInfo = temperatureData.getDay(i)
             val landInfo = landForecastData.getDay(i)
 
@@ -82,18 +82,19 @@ class DtoParser {
             val pmWeather = landInfo.pmWeather
 
             // 각 날짜별로 필요한 처리를 수행합니다.
-            val dto = TemperatureAndLandForecastDto(
-                regionCode = regionCode,
-                baseTime = baseTime,
-                minTemp = minTemp,
-                maxTemp = maxTemp,
-                minTempRange = minTempRange,
-                maxTempRange = maxTempRange,
-                amRainPercent = amRainPercent,
-                pmRainPercent = pmRainPercent,
-                amWeather = amWeather,
-                pmWeather = pmWeather,
-            )
+            val dto =
+                TemperatureAndLandForecastDto(
+                    regionCode = regionCode,
+                    baseTime = baseTime,
+                    minTemp = minTemp,
+                    maxTemp = maxTemp,
+                    minTempRange = minTempRange,
+                    maxTempRange = maxTempRange,
+                    amRainPercent = amRainPercent,
+                    pmRainPercent = pmRainPercent,
+                    amWeather = amWeather,
+                    pmWeather = pmWeather,
+                )
 
             resultList.add(dto)
         }
