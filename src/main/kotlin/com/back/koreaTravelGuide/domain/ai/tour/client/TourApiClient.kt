@@ -4,11 +4,13 @@ import com.back.koreaTravelGuide.domain.ai.tour.dto.InternalData
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 // 09.25 양현준
+@Component
 class TourApiClient(
     private val restTemplate: RestTemplate,
     private val objectMapper: ObjectMapper,

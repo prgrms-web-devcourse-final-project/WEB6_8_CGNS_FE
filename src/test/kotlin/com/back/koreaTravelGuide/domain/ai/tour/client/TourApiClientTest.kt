@@ -5,6 +5,7 @@ import com.back.koreaTravelGuide.domain.ai.tour.dto.InternalData
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,6 +58,7 @@ class TourApiClientTest {
     }
 
     // 첫 번째 관광 정보를 반환하는지.
+    @DisplayName("TourApiClient - fetchTourInfo")
     @Test
     fun testReturnsFirstTourInfo() {
         val params = InternalData(numOfRows = 2, pageNo = 1, areaCode = "1", sigunguCode = "7")
@@ -72,6 +74,7 @@ class TourApiClientTest {
     }
 
     // item 배열이 비어 있으면 null을 돌려주는지.
+    @DisplayName("TourApiClient - fetchTourInfo")
     @Test
     fun testReturnsNullWhenItemsMissing() {
         val params = InternalData(numOfRows = 1, pageNo = 1, areaCode = "1", sigunguCode = "7")
