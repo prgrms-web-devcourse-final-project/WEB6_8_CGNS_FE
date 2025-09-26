@@ -15,7 +15,7 @@ class WeatherService(
     private val weatherApiClient: WeatherApiClient,
     private val parser: DtoParser,
 ) {
-    @Cacheable("weatherMidFore", key = "#actualRegionCode + '_' + #actualBaseTime")
+    @Cacheable("weatherMidFore", key = "'전국_' + #actualBaseTime")
     fun fetchMidForecast(actualBaseTime: String): List<MidForecastDto>? {
         val prefixes = listOf("11B", "11D1", "11D2", "11C2", "11C1", "11F2", "11F1", "11H1", "11H2", "11G")
         val midForecastList = mutableListOf<MidForecastDto>()
@@ -34,13 +34,13 @@ class WeatherService(
     fun fetchTemperatureAndLandForecast(
         actualRegionCode: String,
         actualBaseTime: String,
-    ): TemperatureAndLandForecastDto? {
+    ): List<TemperatureAndLandForecastDto>? {
         val tempInfo = weatherApiClient.fetchTemperature(actualRegionCode, actualBaseTime)
         val landInfo = weatherApiClient.fetchLandForecast(actualRegionCode, actualBaseTime)
 
         if (tempInfo == null || landInfo == null) return null
 
-        return parser.parseTemperatureAndLandForecast(tempInfo, landInfo)
+        return parser.parseTemperatureAndLandForecast(actualRegionCode, actualBaseTime, tempInfo, landInfo)
     }
 
     @CacheEvict(cacheNames = ["weatherMidFore", "weatherTempAndLandFore"], allEntries = true)

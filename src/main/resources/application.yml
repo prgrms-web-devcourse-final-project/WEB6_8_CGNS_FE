@@ -76,7 +76,7 @@ springdoc:
 # Weather API 설정
 weather:
   api:
-    key: ${WEATHER_API_KEY:your-weather-api-key-here}
+    key: ${WEATHER_API_KEY:6f5c5689b976ae29611f2b2e1a024430f0fd31383ecb502104a250954a2b916e}
     base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
 
 

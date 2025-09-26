@@ -1,4 +1,4 @@
-package com.back.koreaTravelGuide.application
+package com.back.koreaTravelGuide
 
 // TODO: 메인 애플리케이션 클래스 - 스프링 부트 시작점 및 환경변수 로딩
 import io.github.cdimascio.dotenv.dotenv

@@ -2,7 +2,7 @@ package com.back.koreaTravelGuide.domain.ai.weather.client.tools
 
 import org.springframework.stereotype.Component
 
-@Component
+@Component("clientTools")
 class Tools {
     fun getStnIdFromRegionCode(regionCode: String): String {
         return when {
