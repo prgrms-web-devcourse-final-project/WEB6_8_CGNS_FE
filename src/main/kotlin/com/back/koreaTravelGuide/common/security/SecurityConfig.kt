@@ -68,7 +68,7 @@ class SecurityConfig(
             }
 
             if (!isDev) {
-                addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+                addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
             }
         }
 
