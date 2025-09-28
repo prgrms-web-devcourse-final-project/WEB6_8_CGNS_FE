@@ -1,5 +1,6 @@
 package com.back.koreaTravelGuide.domain.userChat.chatroom.service
 
+import com.back.koreaTravelGuide.domain.userChat.chatmessage.repository.ChatMessageRepository
 import com.back.koreaTravelGuide.domain.userChat.chatroom.entity.ChatRoom
 import com.back.koreaTravelGuide.domain.userChat.chatroom.repository.ChatRoomRepository
 import org.springframework.stereotype.Service
@@ -9,8 +10,9 @@ import java.time.Instant
 @Service
 class ChatRoomService(
     private val roomRepository: ChatRoomRepository,
+    private val messageRepository: ChatMessageRepository,
 ) {
-    data class CreateRoomReq(val title: String, val guideId: Long, val userId: Long)
+    data class CreateRoomRequest(val title: String, val guideId: Long, val userId: Long)
 
     @Transactional
     fun exceptOneToOneRoom(
@@ -27,7 +29,9 @@ class ChatRoomService(
         )
     }
 
-    fun get(roomId: Long): ChatRoom = roomRepository.findById(roomId).orElseThrow { NoSuchElementException("room not found: $roomId") }
+    fun get(roomId: Long): ChatRoom =
+        roomRepository.findById(roomId)
+            .orElseThrow { NoSuchElementException("room not found: $roomId") }
 
     @Transactional
     fun deleteByOwner(
@@ -39,6 +43,7 @@ class ChatRoomService(
             // 예외처리 임시
             throw IllegalArgumentException("채팅방 생성자만 삭제할 수 있습니다.")
         }
+        messageRepository.deleteByRoomId(roomId)
         roomRepository.deleteById(roomId)
     }
 }
