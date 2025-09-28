@@ -12,11 +12,11 @@ data class TourSearchParams(
     // 페이지 번호, 1로 지정
     val pageNo: Int = DEFAULT_PAGE,
     // 관광타입 ID, 미 입력시 전체 조회 (12:관광지, 38 : 쇼핑...),
-    val contentTypeId: String? = "",
+    val contentTypeId: String? = null,
     // 지역코드, 미 입력시 지역 전체 조회 (1:서울, 2:인천...)
-    val areaCode: String? = "",
+    val areaCode: String? = null,
     // 시군구코드, 미 입력시 전체 조회
-    val sigunguCode: String? = "",
+    val sigunguCode: String? = null,
 ) {
     companion object {
         const val DEFAULT_ROWS = 10
