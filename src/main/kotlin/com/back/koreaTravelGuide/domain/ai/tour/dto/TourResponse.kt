@@ -6,7 +6,6 @@ package com.back.koreaTravelGuide.domain.ai.tour.dto
  * API 매뉴얼에서 필수인 값은 NonNull로 지정.
  */
 
-// 관광 정보 응답
 data class TourResponse(
     val items: List<TourItem>,
 )

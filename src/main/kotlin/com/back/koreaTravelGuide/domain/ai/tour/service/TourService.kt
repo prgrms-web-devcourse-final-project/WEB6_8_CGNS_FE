@@ -20,8 +20,8 @@ class TourService(
         contentTypeId: String? = null,
         areaCode: String? = null,
         sigunguCode: String? = null,
-    ): List<TourResponse> {
-        // InternalData 객체 생성, null 또는 비정상 값은 기본값으로 대체
+    ): TourResponse {
+        // null 또는 비정상 값은 기본값으로 대체
         val request =
             TourSearchParams(
                 numOfRows = numOfRows?.takeIf { it > 0 } ?: TourSearchParams.DEFAULT_ROWS,
@@ -35,7 +35,7 @@ class TourService(
         val tours = tourApiClient.fetchTourInfo(request)
 
         // 관광 정보 결과 로깅
-        if (tours.isEmpty()) {
+        if (tours.items.isEmpty()) {
             logger.info(
                 "관광 정보 없음: params={} / {} {}",
                 request.areaCode,
@@ -43,7 +43,7 @@ class TourService(
                 request.contentTypeId,
             )
         } else {
-            logger.info("관광 정보 {}건 조회 성공", tours.size)
+            logger.info("관광 정보 {}건 조회 성공", tours.items.size)
         }
         return tours
     }
