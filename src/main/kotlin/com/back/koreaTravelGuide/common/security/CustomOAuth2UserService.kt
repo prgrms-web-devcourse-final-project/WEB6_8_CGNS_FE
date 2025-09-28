@@ -23,6 +23,8 @@ class CustomOAuth2UserService(
         val oAuthUserInfo =
             when (provider) {
                 "google" -> parseGoogle(attributes)
+                "naver" -> parseNaver(attributes)
+                "kakao" -> parseKakao(attributes)
                 else -> throw IllegalArgumentException("지원하지 않는 소셜 로그인입니다.")
             }
 
@@ -55,6 +57,33 @@ class CustomOAuth2UserService(
             email = attributes["email"] as String,
             nickname = attributes["name"] as String,
             profileImageUrl = attributes["picture"] as String?,
+        )
+    }
+
+    private fun parseNaver(attributes: Map<String, Any>): OAuthUserInfo {
+        val response = attributes["response"] as Map<String, Any>
+
+        return OAuthUserInfo(
+            oauthId = response["id"] as String,
+            email = response["email"] as String,
+            nickname = response["name"] as String,
+            profileImageUrl = response["profile_image"] as String?,
+        )
+    }
+
+    private fun parseKakao(attributes: Map<String, Any>): OAuthUserInfo {
+        val kakaoAccount = attributes["kakao_account"] as? Map<String, Any>
+        val profile = kakaoAccount?.get("profile") as? Map<String, Any>
+        val kakaoId = attributes["id"].toString()
+
+        // 카카오는 이메일 못받아서 이렇게 처리했음
+        val email = kakaoAccount?.get("email") as? String ?: "kakao_$kakaoId@social.login"
+
+        return OAuthUserInfo(
+            oauthId = kakaoId,
+            email = email,
+            nickname = profile?.get("nickname") as? String ?: "사용자",
+            profileImageUrl = profile?.get("profile_image_url") as? String,
         )
     }
 }
