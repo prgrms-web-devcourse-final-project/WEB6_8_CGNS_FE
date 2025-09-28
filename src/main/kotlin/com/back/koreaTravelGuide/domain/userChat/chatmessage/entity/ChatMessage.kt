@@ -21,7 +21,7 @@ data class ChatMessage(
     val roomId: Long,
     @Column(name = "sender_id", nullable = false)
     val senderId: Long,
-    @Column(columnDefinition = "text", nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     val content: String,
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),
