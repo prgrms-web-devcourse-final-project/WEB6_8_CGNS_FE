@@ -19,8 +19,10 @@ data class ChatRoom(
     val id: Long? = null,
     @Column(nullable = false)
     val title: String,
-    @Column(name = "owner_id", nullable = false)
-    val ownerId: Long,
+    @Column(name = "guide_id", nullable = false)
+    val guideId: Long,
+    @Column(name = "user_id", nullable = false)
+    val userId: Long,
     @Column(name = "updated_at", nullable = false)
     val updatedAt: Instant = Instant.now(),
     @Column(name = "last_message_id")
