@@ -1,20 +1,26 @@
 package com.back.koreaTravelGuide.domain.ai.tour.dto
 
 /**
- * 9.25 양현준
+ * 9.27 양현준
  * 관광 정보 응답 DTO
  * API 매뉴얼에서 필수인 값은 NonNull로 지정.
  */
+
 data class TourResponse(
-    // 콘텐츠ID (고유 번호)
+    val items: List<TourItem>,
+)
+
+// 관광 정보 단일 아이템
+data class TourItem(
+    // 콘텐츠ID (고유 번호, NonNull)
     val contentId: String,
-    // 관광타입 ID (12: 관광지, 14: 문화시설 ..)
+    // 관광타입 ID (12: 관광지, NonNull)
     val contentTypeId: String,
-    // 등록일
+    // 등록일 (NonNull)
     val createdTime: String,
-    // 수정일
+    // 수정일 (NonNull)
     val modifiedTime: String,
-    // 제목
+    // 제목 (NonNull)
     val title: String,
     // 주소
     val addr1: String?,
@@ -32,7 +38,7 @@ data class TourResponse(
     val mlevel: String?,
     // 시군구코드
     val sigunguCode: String?,
-    // 법정동 시도 코드, 응답 코드가 IDongRegnCd 이므로,
+    // 법정동 시도 코드
     val lDongRegnCd: String?,
     // 법정동 시군구 코드
     val lDongSignguCd: String?,
