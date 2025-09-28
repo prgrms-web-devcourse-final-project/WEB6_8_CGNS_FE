@@ -12,7 +12,6 @@ class ChatRoomService(
     private val roomRepository: ChatRoomRepository,
     private val messageRepository: ChatMessageRepository,
 ) {
-
     @Transactional
     fun exceptOneToOneRoom(
         guideId: Long,
