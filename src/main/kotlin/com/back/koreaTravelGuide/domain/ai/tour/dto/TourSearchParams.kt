@@ -1,12 +1,12 @@
 package com.back.koreaTravelGuide.domain.ai.tour.dto
 
 /**
- * 9.25 양현준
- * 관광 정보 호출용 파라미터
- * 기능상, 생략 가능한 필드는 생략 (arrange : 제목 순으로 정렬, cat : 대,중,소 분류, crpyrhtDivCd: 저작권유형)
+ * 9.27 양현준
+ * API 요청 파라미터
+ * 기능상, 생략 가능한 필드는 생략 (arrange : 제목 순, cat : 대,중,소 분류, crpyrhtDivCd: 저작권유형)
  */
 
-data class InternalData(
+data class TourSearchParams(
     // 한 페이지 데이터 수, 10으로 지정
     val numOfRows: Int = DEFAULT_ROWS,
     // 페이지 번호, 1로 지정

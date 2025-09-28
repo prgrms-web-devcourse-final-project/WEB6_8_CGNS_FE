@@ -1,8 +1,8 @@
 package com.back.koreaTravelGuide.domain.ai.tour.service
 
 import com.back.koreaTravelGuide.domain.ai.tour.client.TourApiClient
-import com.back.koreaTravelGuide.domain.ai.tour.dto.InternalData
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
+import com.back.koreaTravelGuide.domain.ai.tour.dto.TourSearchParams
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -23,9 +23,9 @@ class TourService(
     ): List<TourResponse> {
         // InternalData 객체 생성, null 또는 비정상 값은 기본값으로 대체
         val request =
-            InternalData(
-                numOfRows = numOfRows?.takeIf { it > 0 } ?: InternalData.DEFAULT_ROWS,
-                pageNo = pageNo?.takeIf { it > 0 } ?: InternalData.DEFAULT_PAGE,
+            TourSearchParams(
+                numOfRows = numOfRows?.takeIf { it > 0 } ?: TourSearchParams.DEFAULT_ROWS,
+                pageNo = pageNo?.takeIf { it > 0 } ?: TourSearchParams.DEFAULT_PAGE,
                 contentTypeId = contentTypeId?.ifBlank { null } ?: "",
                 areaCode = areaCode?.ifBlank { null } ?: "",
                 sigunguCode = sigunguCode?.ifBlank { null } ?: "",
