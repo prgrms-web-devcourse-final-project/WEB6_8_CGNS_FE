@@ -81,14 +81,14 @@ spring:
       client:
         registration:
           google:
-            client-id: 11962659605-optp0eb5h1c1ob1b9qie53s83j165qt8.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - profile
               - email
           naver:
-            client-id: At2KDxDK_ppHMuMYqEDL
-            client-secret: osKwSljl9i
+            client-id: ${NAVER_CLIENT_ID}
+            client-secret: ${NAVER_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
@@ -97,8 +97,8 @@ spring:
               - profile_image
             client-name: Naver
           kakao:
-            client-id: da170def761db299a36665bbcf50817b
-            client-secret: SoEKP391vVXvrMy3nANjdWZA7RrheBJW
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
