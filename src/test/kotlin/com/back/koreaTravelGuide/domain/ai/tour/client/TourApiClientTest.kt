@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-// 09.25 양현준
+// 09.26 양현준
 @ExtendWith(SpringExtension::class)
 // 패키지 경로에서 메인 설정을 찾지 못하는 오류를 해결하기 위해 애플리케이션 클래스를 명시.
 @SpringBootTest(classes = [KoreaTravelGuideApplication::class])
@@ -57,8 +57,7 @@ class TourApiClientTest {
         tourApiClient = TourApiClient(restTemplate, objectMapper, serviceKey, apiUrl)
     }
 
-    // 첫 번째 관광 정보를 반환하는지.
-    @DisplayName("TourApiClient - fetchTourInfo")
+    @DisplayName("fetchTourInfo - 첫 번째 관광 정보를 반환하는지.")
     @Test
     fun testReturnsFirstTourInfo() {
         val params = InternalData(numOfRows = 2, pageNo = 1, areaCode = "1", sigunguCode = "7")
@@ -73,8 +72,7 @@ class TourApiClientTest {
         assertEquals("7", result.sigunguCode)
     }
 
-    // item 배열이 비어 있으면 null을 돌려주는지.
-    @DisplayName("TourApiClient - fetchTourInfo")
+    @DisplayName("fetchTourInfo - item 배열이 비어 있으면 null을 돌려주는지.")
     @Test
     fun testReturnsNullWhenItemsMissing() {
         val params = InternalData(numOfRows = 1, pageNo = 1, areaCode = "1", sigunguCode = "7")
