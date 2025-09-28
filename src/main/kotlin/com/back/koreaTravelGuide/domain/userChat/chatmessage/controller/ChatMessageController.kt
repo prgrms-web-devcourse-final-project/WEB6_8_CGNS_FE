@@ -3,6 +3,7 @@ package com.back.koreaTravelGuide.domain.userChat.chatmessage.controller
 import com.back.koreaTravelGuide.common.ApiResponse
 import com.back.koreaTravelGuide.domain.userChat.chatmessage.service.ChatMessageService
 import org.springframework.http.ResponseEntity
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/userchat/rooms")
 class ChatMessageController(
     private val msgSvc: ChatMessageService,
-//    private val messagingTemplate: SimpMessagingTemplate,
+    private val messagingTemplate: SimpMessagingTemplate,
 ) {
     @GetMapping("/{roomId}/messages")
     fun listMessages(
@@ -38,10 +39,10 @@ class ChatMessageController(
         @RequestBody req: ChatMessageService.SendMessageReq,
     ): ResponseEntity<ApiResponse<Any>> {
         val saved = msgSvc.send(roomId, req)
-//         messagingTemplate.convertAndSend(
-//            "/topic/userchat/$roomId",
-//            ApiResponse(msg = "메시지 전송", data = saved),
-//        )
+        messagingTemplate.convertAndSend(
+            "/topic/userchat/$roomId",
+            ApiResponse(msg = "메시지 전송", data = saved),
+        )
         return ResponseEntity.status(201).body(ApiResponse(msg = "메시지 전송", data = saved))
     }
 }

@@ -12,7 +12,6 @@ class ChatRoomService(
     private val roomRepository: ChatRoomRepository,
     private val messageRepository: ChatMessageRepository,
 ) {
-    data class CreateRoomRequest(val title: String, val guideId: Long, val userId: Long)
 
     @Transactional
     fun exceptOneToOneRoom(
