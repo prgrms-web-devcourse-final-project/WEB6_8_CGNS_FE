@@ -1,6 +1,5 @@
-package com.back.koreaTravelGuide.domain.ai.weather.client
-
 import com.back.koreaTravelGuide.KoreaTravelGuideApplication
+import com.back.koreaTravelGuide.domain.ai.weather.client.WeatherApiClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.DisplayName
