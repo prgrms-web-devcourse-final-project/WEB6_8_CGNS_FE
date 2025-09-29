@@ -8,6 +8,7 @@ import com.back.koreaTravelGuide.domain.ai.aiChat.dto.SessionsResponse
 import com.back.koreaTravelGuide.domain.ai.aiChat.dto.UpdateSessionTitleRequest
 import com.back.koreaTravelGuide.domain.ai.aiChat.dto.UpdateSessionTitleResponse
 import com.back.koreaTravelGuide.domain.ai.aiChat.service.AiChatService
+import com.back.koreaTravelGuide.domain.ai.weather.service.WeatherService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/aichat")
 class AiChatController(
     private val aiChatService: AiChatService,
+    private val weatherService: WeatherService,
 ) {
     @GetMapping("/sessions")
     fun getSessions(
