@@ -30,7 +30,7 @@ class AiChatController(
     ): ResponseEntity<ApiResponse<List<SessionsResponse>>> {
         val sessions =
             aiChatService.getSessions(userId).map {
-                SessionsResponse(it.id!!, it.sessionTitle)
+                SessionsResponse.from(it)
             }
         return ResponseEntity.ok(ApiResponse("채팅방 목록을 성공적으로 조회했습니다.", sessions))
     }
@@ -40,7 +40,7 @@ class AiChatController(
         @RequestParam userId: Long,
     ): ResponseEntity<ApiResponse<SessionsResponse>> {
         val session = aiChatService.createSession(userId)
-        val response = SessionsResponse(session.id!!, session.sessionTitle)
+        val response = SessionsResponse.from(session)
         return ResponseEntity.ok(ApiResponse("채팅방이 성공적으로 생성되었습니다.", response))
     }
 
