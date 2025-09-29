@@ -2,7 +2,9 @@ spring:
   profiles:
     active: dev
   config:
-    import: "optional:file:.env[.properties]"
+    import: 
+      - "optional:file:.env[.properties]"
+      - "classpath:region-codes.yml"
 
   # Spring AI 1.0.0-M6 설정 (OpenRouter 사용)
   ai:

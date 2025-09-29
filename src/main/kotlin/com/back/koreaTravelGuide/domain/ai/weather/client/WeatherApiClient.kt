@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.weather.client
 
 // TODO: 기상청 API 클라이언트 - HTTP 요청으로 날씨 데이터 조회 및 JSON 파싱
+import com.back.koreaTravelGuide.common.logging.log
 import com.back.koreaTravelGuide.domain.ai.weather.client.parser.DataParser
 import com.back.koreaTravelGuide.domain.ai.weather.client.tools.Tools
 import com.back.koreaTravelGuide.domain.ai.weather.dto.LandForecastData
@@ -25,25 +26,22 @@ class WeatherApiClient(
         val stnId = tools.getStnIdFromRegionCode(regionId)
         val url = "$apiUrl/getMidFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&stnId=$stnId&tmFc=$baseTime&dataType=JSON"
 
-        println("🔮 중기전망조회 API 호출: $url")
-
         return try {
             @Suppress("UNCHECKED_CAST")
             val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
-            println("📡 중기전망 JSON 응답 수신")
 
             jsonResponse?.let { response ->
                 // API 오류 응답 체크
                 val resultCode = dataParser.extractJsonValue(response, "response.header.resultCode") as? String
                 if (resultCode == "03" || resultCode == "NO_DATA") {
-                    println("⚠️ 기상청 API NO_DATA 오류 - 발표시각을 조정해야 할 수 있습니다")
+                    log.warn("기상청 API NO_DATA 오류 - 발표시각을 조정해야 할 수 있습니다")
                     return null
                 }
 
                 dataParser.extractJsonValue(response, "response.body.items.item[0].wfSv") as? String
             }
         } catch (e: Exception) {
-            println("❌ 중기전망조회 JSON API 오류: ${e.message}")
+            log.warn("중기전망조회 JSON API 오류: ${e.message}")
             null
         }
     }
@@ -55,16 +53,13 @@ class WeatherApiClient(
     ): TemperatureData? {
         val url = "$apiUrl/getMidTa?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
-        println("🌡️ 중기기온조회 API 호출: $url")
-
         return try {
             @Suppress("UNCHECKED_CAST")
             val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
-            println("📡 중기기온 JSON 응답 수신")
 
             jsonResponse?.let { dataParser.parseTemperatureDataFromJson(it) } ?: TemperatureData()
         } catch (e: Exception) {
-            println("❌ 중기기온조회 JSON API 오류: ${e.message}")
+            log.warn("중기기온조회 JSON API 오류: ${e.message}")
             TemperatureData()
         }
     }
@@ -76,16 +71,13 @@ class WeatherApiClient(
     ): LandForecastData? {
         val url = "$apiUrl/getMidLandFcst?serviceKey=$serviceKey&numOfRows=10&pageNo=1&regId=$regionId&tmFc=$baseTime&dataType=JSON"
 
-        println("🌧️ 중기육상예보조회 API 호출: $url")
-
         return try {
             @Suppress("UNCHECKED_CAST")
             val jsonResponse = restTemplate.getForObject(url, Map::class.java) as? Map<String, Any>
-            println("📡 중기육상예보 JSON 응답 수신")
 
             jsonResponse?.let { dataParser.parsePrecipitationDataFromJson(it) } ?: LandForecastData()
         } catch (e: Exception) {
-            println("❌ 중기육상예보조회 JSON API 오류: ${e.message}")
+            log.warn("중기육상예보조회 JSON API 오류: ${e.message}")
             LandForecastData()
         }
     }

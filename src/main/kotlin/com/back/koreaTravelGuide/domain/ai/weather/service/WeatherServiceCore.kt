@@ -1,34 +1,61 @@
 package com.back.koreaTravelGuide.domain.ai.weather.service
 
-// TODO: 날씨 정보 캐싱 서비스 - @Cacheable 어노테이션 기반 캐싱
+import com.back.koreaTravelGuide.common.logging.log
+import com.back.koreaTravelGuide.domain.ai.weather.client.WeatherApiClient
 import com.back.koreaTravelGuide.domain.ai.weather.dto.MidForecastDto
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureAndLandForecastDto
-import com.back.koreaTravelGuide.domain.ai.weather.service.tools.Tools
+import com.back.koreaTravelGuide.domain.weather.dto.parser.DtoParser
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
 class WeatherServiceCore(
-    val weatherService: WeatherService,
-    val tools: Tools,
+    private val weatherApiClient: WeatherApiClient,
+    private val parser: DtoParser,
 ) {
-    fun getWeatherForecast(baseTime: String?): List<MidForecastDto>? {
-        // baseTime 유효성 검사 - 06시 또는 18시만 허용
-        val actualBaseTime = tools.validBaseTime(baseTime)
+    @Cacheable("weatherMidFore", key = "'전국_' + #actualBaseTime")
+    fun fetchMidForecast(actualBaseTime: String): List<MidForecastDto>? {
+        val prefixes = listOf("11B", "11D1", "11D2", "11C2", "11C1", "11F2", "11F1", "11H1", "11H2", "11G")
+        val midForecastList = mutableListOf<MidForecastDto>()
 
-        return weatherService.fetchMidForecast(actualBaseTime)
+        for (regionId in prefixes) {
+            val info = weatherApiClient.fetchMidForecast(regionId, actualBaseTime)
+            if (info.isNullOrBlank()) {
+                log.warn("MidForecast Api error => regionId: $regionId")
+                continue
+            }
+
+            val dto = parser.parseMidForecast(regionId, actualBaseTime, info)
+            midForecastList.add(dto)
+        }
+        // 리스트가 비어있으면 null 반환 -> api 호출 실패 처리해야함.
+        if (midForecastList.isEmpty()) return null
+        return midForecastList
     }
 
-    fun getTemperatureAndLandForecast(
-        location: String?,
-        regionCode: String?,
-        baseTime: String?,
+    @Cacheable("weatherTempAndLandFore", key = "#actualRegionCode + '_' + #actualBaseTime")
+    fun fetchTemperatureAndLandForecast(
+        actualRegionCode: String,
+        actualBaseTime: String,
     ): List<TemperatureAndLandForecastDto>? {
-        val actualLocation = location ?: "서울"
-        val actualRegionCode = regionCode ?: tools.getRegionCodeFromLocation(actualLocation)
+        val tempInfo = weatherApiClient.fetchTemperature(actualRegionCode, actualBaseTime)
+        val landInfo = weatherApiClient.fetchLandForecast(actualRegionCode, actualBaseTime)
 
-        // baseTime 유효성 검사 - 06시 또는 18시만 허용
-        val actualBaseTime = tools.validBaseTime(baseTime)
+        // 둘 중 하나라도 null이면 null 반환 -> api 호출 실패 처리해야함.
+        if (tempInfo == null || landInfo == null) {
+            log.warn("Temp, Land Api error => actualRegionCode: $actualRegionCode")
+            return null
+        }
 
-        return weatherService.fetchTemperatureAndLandForecast(actualRegionCode, actualBaseTime)
+        return parser.parseTemperatureAndLandForecast(actualRegionCode, actualBaseTime, tempInfo, landInfo)
+    }
+
+    // 인스턴스가 여러개 있는 상황에서는 중복 삭제될 수 있음. 나중에 분산 락 고려
+    @CacheEvict(cacheNames = ["weatherMidFore", "weatherTempAndLandFore"], allEntries = true)
+    @Scheduled(fixedRate = 43200000) // 12시간마다 (12 * 60 * 60 * 1000)
+    fun clearWeatherCache() {
+        log.info("clearWeatherCache")
     }
 }
