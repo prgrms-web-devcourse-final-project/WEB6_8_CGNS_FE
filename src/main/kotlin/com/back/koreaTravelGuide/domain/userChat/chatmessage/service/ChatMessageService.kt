@@ -13,11 +13,13 @@ class ChatMessageService(
 ) {
     data class SendMessageReq(val senderId: Long, val content: String)
 
+    @Transactional(readOnly = true)
     fun getlistbefore(
         roomId: Long,
         limit: Int,
     ): List<ChatMessage> = msgRepository.findTop50ByRoomIdOrderByIdDesc(roomId).asReversed()
 
+    @Transactional(readOnly = true)
     fun getlistafter(
         roomId: Long,
         afterId: Long,
