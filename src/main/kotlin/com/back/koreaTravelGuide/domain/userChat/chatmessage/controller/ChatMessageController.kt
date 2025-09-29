@@ -1,6 +1,8 @@
 package com.back.koreaTravelGuide.domain.userChat.chatmessage.controller
 
 import com.back.koreaTravelGuide.common.ApiResponse
+import com.back.koreaTravelGuide.domain.userChat.chatmessage.dto.ChatMessageResponse
+import com.back.koreaTravelGuide.domain.userChat.chatmessage.dto.ChatMessageSendRequest
 import com.back.koreaTravelGuide.domain.userChat.chatmessage.service.ChatMessageService
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -23,26 +25,28 @@ class ChatMessageController(
         @PathVariable roomId: Long,
         @RequestParam(required = false) after: Long?,
         @RequestParam(defaultValue = "50") limit: Int,
-    ): ResponseEntity<ApiResponse<Any>> {
+    ): ResponseEntity<ApiResponse<List<ChatMessageResponse>>> {
         val messages =
             if (after == null) {
                 messageService.getlistbefore(roomId, limit)
             } else {
                 messageService.getlistafter(roomId, after)
             }
-        return ResponseEntity.ok(ApiResponse(msg = "메시지 조회", data = messages))
+        val responseMessages = messages.map(ChatMessageResponse::from)
+        return ResponseEntity.ok(ApiResponse(msg = "메시지 조회", data = responseMessages))
     }
 
     @PostMapping("/{roomId}/messages")
     fun sendMessage(
         @PathVariable roomId: Long,
-        @RequestBody req: ChatMessageService.SendMessageReq,
-    ): ResponseEntity<ApiResponse<Any>> {
-        val saved = messageService.send(roomId, req)
+        @RequestBody req: ChatMessageSendRequest,
+    ): ResponseEntity<ApiResponse<ChatMessageResponse>> {
+        val saved = messageService.send(roomId, req.senderId, req.content)
+        val response = ChatMessageResponse.from(saved)
         messagingTemplate.convertAndSend(
             "/topic/userchat/$roomId",
-            ApiResponse(msg = "메시지 전송", data = saved),
+            ApiResponse(msg = "메시지 전송", data = response),
         )
-        return ResponseEntity.status(201).body(ApiResponse(msg = "메시지 전송", data = saved))
+        return ResponseEntity.status(201).body(ApiResponse(msg = "메시지 전송", data = response))
     }
 }

@@ -11,8 +11,6 @@ class ChatMessageService(
     private val messageRepository: ChatMessageRepository,
     private val roomRepository: ChatRoomRepository,
 ) {
-    data class SendMessageReq(val senderId: Long, val content: String)
-
     @Transactional(readOnly = true)
     fun getlistbefore(
         roomId: Long,
@@ -28,9 +26,10 @@ class ChatMessageService(
     @Transactional
     fun send(
         roomId: Long,
-        req: SendMessageReq,
+        senderId: Long,
+        content: String,
     ): ChatMessage {
-        val saved = messageRepository.save(ChatMessage(roomId = roomId, senderId = req.senderId, content = req.content))
+        val saved = messageRepository.save(ChatMessage(roomId = roomId, senderId = senderId, content = content))
         roomRepository.findById(roomId).ifPresent {
             roomRepository.save(it.copy(updatedAt = saved.createdAt, lastMessageId = saved.id))
         }
