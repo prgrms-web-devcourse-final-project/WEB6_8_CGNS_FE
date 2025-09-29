@@ -27,6 +27,7 @@ class ChatRoomService(
         )
     }
 
+    @Transactional(readOnly = true)
     fun get(roomId: Long): ChatRoom =
         roomRepository.findById(roomId)
             .orElseThrow { NoSuchElementException("room not found: $roomId") }

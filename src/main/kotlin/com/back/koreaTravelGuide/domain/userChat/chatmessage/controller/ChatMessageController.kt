@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/userchat/rooms")
 class ChatMessageController(
-    private val msgSvc: ChatMessageService,
+    private val messageService: ChatMessageService,
     private val messagingTemplate: SimpMessagingTemplate,
 ) {
     @GetMapping("/{roomId}/messages")
@@ -26,9 +26,9 @@ class ChatMessageController(
     ): ResponseEntity<ApiResponse<Any>> {
         val messages =
             if (after == null) {
-                msgSvc.getlistbefore(roomId, limit)
+                messageService.getlistbefore(roomId, limit)
             } else {
-                msgSvc.getlistafter(roomId, after)
+                messageService.getlistafter(roomId, after)
             }
         return ResponseEntity.ok(ApiResponse(msg = "메시지 조회", data = messages))
     }
@@ -38,7 +38,7 @@ class ChatMessageController(
         @PathVariable roomId: Long,
         @RequestBody req: ChatMessageService.SendMessageReq,
     ): ResponseEntity<ApiResponse<Any>> {
-        val saved = msgSvc.send(roomId, req)
+        val saved = messageService.send(roomId, req)
         messagingTemplate.convertAndSend(
             "/topic/userchat/$roomId",
             ApiResponse(msg = "메시지 전송", data = saved),
