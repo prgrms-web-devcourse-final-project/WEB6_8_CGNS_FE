@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/userchat/rooms")
 class ChatRoomController(
-    private val roomSvc: ChatRoomService,
+    private val roomService: ChatRoomService,
 ) {
     data class StartChatReq(val guideId: Long, val userId: Long)
 
@@ -25,7 +25,7 @@ class ChatRoomController(
     fun startChat(
         @RequestBody req: StartChatReq,
     ): ResponseEntity<ApiResponse<Map<String, Long>>> {
-        val roomId = roomSvc.exceptOneToOneRoom(req.guideId, req.userId).id!!
+        val roomId = roomService.exceptOneToOneRoom(req.guideId, req.userId).id!!
         return ResponseEntity.ok(ApiResponse(msg = "채팅방 시작", data = mapOf("roomId" to roomId)))
     }
 
@@ -34,12 +34,12 @@ class ChatRoomController(
         @PathVariable roomId: Long,
         @RequestBody req: DeleteChatReq,
     ): ResponseEntity<ApiResponse<Unit>> {
-        roomSvc.deleteByOwner(roomId, req.userId)
+        roomService.deleteByOwner(roomId, req.userId)
         return ResponseEntity.ok(ApiResponse("채팅방 삭제 완료"))
     }
 
     @GetMapping("/{roomId}")
     fun get(
         @PathVariable roomId: Long,
-    ) = ResponseEntity.ok(ApiResponse(msg = "채팅방 조회", data = roomSvc.get(roomId)))
+    ) = ResponseEntity.ok(ApiResponse(msg = "채팅방 조회", data = roomService.get(roomId)))
 }
