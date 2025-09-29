@@ -23,11 +23,9 @@ class TourApiClientTest {
     @Value("\${tour.api.key}")
     private lateinit var serviceKey: String
 
-
     @DisplayName("fetchTourInfo - 실제 관광청 API 호출 (데이터 기대)")
     @Test
     fun fetchTourInfoTest() {
-
         val params =
             TourSearchParams(
                 numOfRows = 1,
@@ -48,7 +46,6 @@ class TourApiClientTest {
     @DisplayName("fetchTourInfo - 실제 관광청 API 장애 시 빈 결과 확인")
     @Test
     fun fetchTourInfoEmptyTest() {
-
         val params =
             TourSearchParams(
                 numOfRows = 1,
