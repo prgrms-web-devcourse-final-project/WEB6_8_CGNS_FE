@@ -26,11 +26,6 @@ class ChatMessageService(
     ): List<ChatMessage> = messageRepository.findByRoomIdAndIdGreaterThanOrderByIdAsc(roomId, afterId)
 
     @Transactional
-    fun deleteByRoom(roomId: Long) {
-        messageRepository.deleteByRoomId(roomId)
-    }
-
-    @Transactional
     fun send(
         roomId: Long,
         req: SendMessageReq,
