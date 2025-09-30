@@ -46,29 +46,30 @@ class SecurityConfig(
                     }
             }
 
-            oauth2Login {
-                userInfoEndpoint {
-                    userService = customOAuth2UserService
+            if (!isDev) {
+                oauth2Login {
+                    userInfoEndpoint {
+                        userService = customOAuth2UserService
+                    }
+                    authenticationSuccessHandler = customOAuth2LoginSuccessHandler
                 }
-                authenticationSuccessHandler = customOAuth2LoginSuccessHandler
             }
 
             authorizeHttpRequests {
-                // 인증 없이 접근을 허용할 경로들
                 authorize("/h2-console/**", permitAll)
                 authorize("/swagger-ui/**", "/v3/api-docs/**", permitAll)
-                authorize("/api/auth/**", permitAll) // 토큰 재발급 API
+                authorize("/api/auth/**", permitAll)
                 authorize("/favicon.ico", permitAll)
-
-                // 소셜 로그인 흐름을 위한 경로 허용
-                authorize("/login/oauth2/code/*", permitAll)
-                authorize("/oauth2/authorization/*", permitAll)
-
-                // 위에서 허용한 경로 외의 모든 요청은 인증 필요
-                authorize(anyRequest, authenticated)
+                if (isDev) {
+                    authorize(anyRequest, permitAll)
+                } else {
+                    authorize(anyRequest, authenticated)
+                }
             }
 
-            addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
+            if (!isDev) {
+                addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtAuthenticationFilter)
+            }
         }
 
         return http.build()
