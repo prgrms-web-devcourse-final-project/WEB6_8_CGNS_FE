@@ -1,19 +1,12 @@
 package com.back.koreaTravelGuide.domain.ai.weather.service.tools
 
-import com.back.koreaTravelGuide.domain.ai.weather.config.RegionCodeProperties
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Component("serviceTools")
-class Tools(
-    private val regionCodeProperties: RegionCodeProperties,
-) {
-    fun getRegionCodeFromLocation(location: String): String {
-        return regionCodeProperties.getCodeByLocation(location)
-    }
-
+class Tools() {
     fun getCurrentBaseTime(): String {
         val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
         val baseHour =

@@ -131,8 +131,8 @@ springdoc:
 # Weather API 설정
 weather:
   api:
-    key: ${WEATHER_API_KEY}
-    base-url: http://apis.data.go.kr/1360000/MidFcstInfoService
+    key: ${WEATHER__API__KEY}
+    base-url: https://apihub.kma.go.kr/api/typ02/openApi/MidFcstInfoService
 
 # Tour API 설정
 tour:
