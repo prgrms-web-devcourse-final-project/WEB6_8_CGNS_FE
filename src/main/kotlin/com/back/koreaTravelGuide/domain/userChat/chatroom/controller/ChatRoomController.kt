@@ -27,7 +27,7 @@ class ChatRoomController(
         @RequestBody req: ChatRoomStartRequest,
     ): ResponseEntity<ApiResponse<ChatRoomResponse>> {
         val authenticatedId = requesterId ?: throw AccessDeniedException("인증이 필요합니다.")
-        val room = roomService.checkOneToOneRoom(req.guideId, req.userId, authenticatedId)
+        val room = roomService.createOneToOneRoom(req.guideId, req.userId, authenticatedId)
         return ResponseEntity.ok(ApiResponse(msg = "채팅방 시작", data = ChatRoomResponse.from(room)))
     }
 

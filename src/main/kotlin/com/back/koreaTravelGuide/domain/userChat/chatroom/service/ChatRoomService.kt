@@ -15,7 +15,7 @@ class ChatRoomService(
     private val messageRepository: ChatMessageRepository,
 ) {
     @Transactional
-    fun checkOneToOneRoom(
+    fun createOneToOneRoom(
         guideId: Long,
         userId: Long,
         requesterId: Long,
