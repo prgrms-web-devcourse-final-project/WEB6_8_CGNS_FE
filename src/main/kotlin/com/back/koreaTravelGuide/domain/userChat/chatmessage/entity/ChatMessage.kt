@@ -7,7 +7,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.Table
-import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Entity
 @Table(
@@ -24,5 +25,5 @@ data class ChatMessage(
     @Column(nullable = false, columnDefinition = "text")
     val content: String,
     @Column(name = "created_at", nullable = false)
-    val createdAt: Instant = Instant.now(),
+    val createdAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
 )
