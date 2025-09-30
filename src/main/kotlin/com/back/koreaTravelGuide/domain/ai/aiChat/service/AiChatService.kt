@@ -1,7 +1,6 @@
 package com.back.koreaTravelGuide.domain.ai.aiChat.service
 
-import com.back.koreaTravelGuide.common.constant.PromptConstant.AI_ERROR_FALLBACK
-import com.back.koreaTravelGuide.common.constant.PromptConstant.KOREA_TRAVEL_GUIDE_SYSTEM
+import com.back.backend.BuildConfig
 import com.back.koreaTravelGuide.domain.ai.aiChat.entity.AiChatMessage
 import com.back.koreaTravelGuide.domain.ai.aiChat.entity.AiChatSession
 import com.back.koreaTravelGuide.domain.ai.aiChat.entity.SenderType
@@ -66,15 +65,15 @@ class AiChatService(
         val response =
             try {
                 chatClient.prompt()
-                    .system(KOREA_TRAVEL_GUIDE_SYSTEM)
+                    .system(BuildConfig.KOREA_TRAVEL_GUIDE_SYSTEM)
                     .user(message)
                     .advisors { advisor ->
                         advisor.param(ChatMemory.CONVERSATION_ID, sessionId.toString())
                     }
                     .call()
-                    .content() ?: AI_ERROR_FALLBACK
+                    .content() ?: BuildConfig.AI_ERROR_FALLBACK
             } catch (e: Exception) {
-                AI_ERROR_FALLBACK
+                BuildConfig.AI_ERROR_FALLBACK
             }
 
         val aiMessage =

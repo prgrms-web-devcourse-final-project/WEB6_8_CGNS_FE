@@ -6,6 +6,8 @@ plugins {
     kotlin("plugin.jpa") version "1.9.25"
     // 코틀린 코드 스타일 린터
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    // 빌드 설정 상수 생성
+    id("com.github.gmazzo.buildconfig") version "5.3.5"
 }
 
 group = "com.back"
@@ -107,6 +109,38 @@ ktlint {
     }
     filter {
         exclude("**/generated/**")
+        exclude("**/BuildConfig.kt")
         include("**/kotlin/**")
     }
+}
+
+buildConfig {
+    useKotlinOutput()
+
+    val regionCodes =
+        file("src/main/resources/region-codes.yml")
+            .readText()
+            .substringAfter("codes:")
+            .lines()
+            .filter { it.contains(":") }
+            .joinToString(", ") { line ->
+                val parts = line.split(":")
+                "${parts[0].trim()}: ${parts[1].trim().replace("\"", "")}"
+            }
+
+    val promptsText = file("src/main/resources/prompts.yml").readText()
+    val systemPrompt =
+        promptsText
+            .substringAfter("korea-travel-guide: |")
+            .substringBefore("  errors:")
+            .trim()
+
+    val errorPrompt =
+        promptsText
+            .substringAfter("ai-fallback: \"")
+            .substringBefore("\"")
+
+    buildConfigField("String", "REGION_CODES_DESCRIPTION", "\"\"\"$regionCodes\"\"\"")
+    buildConfigField("String", "KOREA_TRAVEL_GUIDE_SYSTEM", "\"\"\"$systemPrompt\"\"\"")
+    buildConfigField("String", "AI_ERROR_FALLBACK", "\"\"\"$errorPrompt\"\"\"")
 }
