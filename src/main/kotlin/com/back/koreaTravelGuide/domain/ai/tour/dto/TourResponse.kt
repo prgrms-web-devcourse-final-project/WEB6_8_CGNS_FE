@@ -34,6 +34,8 @@ data class TourItem(
     val mapX: String?,
     // 위도
     val mapY: String?,
+    // 거리 (위치 기반 조회 시 반환)
+    val distance: String?,
     // 지도 레벨
     val mlevel: String?,
     // 시군구코드
