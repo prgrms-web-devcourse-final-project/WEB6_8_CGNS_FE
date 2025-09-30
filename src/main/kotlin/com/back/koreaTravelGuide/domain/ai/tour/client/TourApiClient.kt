@@ -5,8 +5,8 @@ import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailItem
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailResponse
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourItem
+import com.back.koreaTravelGuide.domain.ai.tour.dto.TourParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
-import com.back.koreaTravelGuide.domain.ai.tour.dto.TourSearchParams
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ class TourApiClient(
     private val logger = LoggerFactory.getLogger(TourApiClient::class.java)
 
     // 요청 URL 구성
-    private fun buildUrl(params: TourSearchParams): URI =
+    private fun buildUrl(params: TourParams): URI =
         UriComponentsBuilder.fromUri(URI.create(apiUrl))
             .path("/areaBasedList2")
             .queryParam("serviceKey", serviceKey)
@@ -43,7 +43,7 @@ class TourApiClient(
             .toUri()
 
     // 지역 기반 관광 정보 조회 (areaBasedList2)
-    fun fetchTourInfo(params: TourSearchParams): TourResponse {
+    fun fetchTourInfo(params: TourParams): TourResponse {
         logger.info("지역 기반 관광 정보 조회 시작")
 
         val url = buildUrl(params)
@@ -90,6 +90,7 @@ class TourApiClient(
             ?: TourResponse(items = emptyList())
     }
 
+    // 공통정보 조회 (detailCommon2)
     fun fetchTourCommonDetail(params: TourDetailParams): TourDetailResponse {
         val url =
             UriComponentsBuilder.fromUri(URI.create(apiUrl))

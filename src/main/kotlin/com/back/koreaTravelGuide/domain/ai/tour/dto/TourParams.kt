@@ -7,7 +7,7 @@ package com.back.koreaTravelGuide.domain.ai.tour.dto
  * 관광타입 ID(12:관광지, 38 : 쇼핑...), 지역코드(1:서울, 2:인천...), 시군구코드(110:종로구, 140:강남구...), 미 입력시 전체 조회
  */
 
-data class TourSearchParams(
+data class TourParams(
     val contentTypeId: String? = null,
     val areaCode: String? = null,
     val sigunguCode: String? = null,
