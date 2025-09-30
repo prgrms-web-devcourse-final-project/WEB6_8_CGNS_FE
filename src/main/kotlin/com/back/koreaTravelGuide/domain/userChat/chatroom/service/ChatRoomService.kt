@@ -20,7 +20,7 @@ class ChatRoomService(
         userId: Long,
         requesterId: Long,
     ): ChatRoom {
-        ensureParticipant(guideId, userId, requesterId)
+        checkParticipant(guideId, userId, requesterId)
         // 1) 기존 방 재사용
         roomRepository.findOneToOneRoom(guideId, userId)?.let { return it }
 
@@ -39,7 +39,7 @@ class ChatRoomService(
         val room =
             roomRepository.findById(roomId)
                 .orElseThrow { NoSuchElementException("room not found: $roomId") }
-        ensureMember(room, requesterId)
+        checkMember(room, requesterId)
         return room
     }
 
@@ -56,7 +56,7 @@ class ChatRoomService(
         roomRepository.deleteById(roomId)
     }
 
-    private fun ensureParticipant(
+    private fun checkParticipant(
         guideId: Long,
         userId: Long,
         requesterId: Long,
@@ -66,7 +66,7 @@ class ChatRoomService(
         }
     }
 
-    private fun ensureMember(
+    private fun checkMember(
         room: ChatRoom,
         requesterId: Long,
     ) {
