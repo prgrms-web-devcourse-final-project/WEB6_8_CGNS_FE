@@ -1,0 +1,60 @@
+name: deploy.yml
+on:
+  push:
+    paths: # 특정 경로에 변경이 있을 때만 워크플로우 실행
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'build.gradle'
+      - 'Dockerfile'
+    branches:
+      - main # main 브랜치에 푸시될 때마다 워크플로우 실행
+jobs:
+  makeTagAndRelease: # 잡 이름, 각 잡들은 의존성이 없으면 병렬로 실행
+    runs-on: ubuntu-latest # 최신 우분투에서 실행
+    outputs:
+      tag_name: ${{ steps.create_tag.outputs.new_tag }}
+    steps: # 아래 명령어들 순차 실행
+      - uses: actions/checkout@v4 # 레포지토리 코드를 워크플로우 실행 환경에 체크아웃(복사)
+      - name: Create Tag
+        id: create_tag
+        uses: mathieudutour/github-tag-action@v6.2  # 태그 생성 액션 사용. 태그 - 0.0.1 ~
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1 # 릴리즈 생성 액션 사용
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create_tag.outputs.new_tag }} # 새로 생성된 태그 사용
+          release_name: Release ${{ steps.create_tag.outputs.new_tag }}
+          body: ${{ steps.create_tag.outputs.changelog }}
+          draft: false
+          prerelease: false
+  buildImageAndPush:
+    name: 도커 이미지 빌드와 푸시
+    needs: makeTagAndRelease
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker Buildx 설치
+        uses: docker/setup-buildx-action@v2
+      - name: 레지스트리 로그인
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+      - name: 빌드 앤 푸시
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/deploy:${{ needs.makeTagAndRelease.outputs.tag_name }},
+            ghcr.io/${{ env.OWNER_LC }}/deploy:latest
