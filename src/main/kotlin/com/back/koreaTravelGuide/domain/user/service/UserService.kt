@@ -5,6 +5,7 @@ import com.back.koreaTravelGuide.domain.user.dto.response.UserResponse
 import com.back.koreaTravelGuide.domain.user.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.NoSuchElementException
 
 @Service
 @Transactional

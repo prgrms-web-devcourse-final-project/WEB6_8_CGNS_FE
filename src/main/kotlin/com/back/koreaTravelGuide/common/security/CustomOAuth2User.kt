@@ -1,4 +1,4 @@
-package com.back.koreaTravelGuide.security
+package com.back.koreaTravelGuide.common.security
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
@@ -8,4 +8,15 @@ class CustomOAuth2User(
     val email: String,
     authorities: Collection<GrantedAuthority>,
     attributes: Map<String, Any>,
-) : DefaultOAuth2User(authorities, attributes, "email")
+    val nameAttributeKey: String,
+) : DefaultOAuth2User(authorities, attributes, nameAttributeKey) {
+    override fun getName(): String {
+        val nameAttribute = getAttribute<Any>(nameAttributeKey)
+
+        if (nameAttribute is Map<*, *>) {
+            return nameAttribute["id"] as String
+        }
+
+        return nameAttribute.toString()
+    }
+}
