@@ -1,18 +1,19 @@
 package com.back.koreaTravelGuide.domain.ai.tour.client
 
-import com.back.koreaTravelGuide.domain.ai.tour.dto.LocationBasedParams
+import com.back.koreaTravelGuide.common.logging.log
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailItem
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailResponse
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourItem
+import com.back.koreaTravelGuide.domain.ai.tour.dto.TourLocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.server.RequestPredicates.queryParam
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -24,9 +25,6 @@ class TourApiClient(
     @Value("\${tour.api.key}") private val serviceKey: String,
     @Value("\${tour.api.base-url}") private val apiUrl: String,
 ) {
-    // println 대신 SLF4J 로거 사용
-    private val logger = LoggerFactory.getLogger(TourApiClient::class.java)
-
     // 요청 URL 구성
     private fun buildUrl(params: TourParams): URI =
         UriComponentsBuilder.fromUri(URI.create(apiUrl))
@@ -44,14 +42,11 @@ class TourApiClient(
 
     // 지역 기반 관광 정보 조회 (areaBasedList2)
     fun fetchTourInfo(params: TourParams): TourResponse {
-        logger.info("지역 기반 관광 정보 조회 시작")
-
         val url = buildUrl(params)
-        logger.info("Tour API URL 생성 : $url")
 
         val body =
             runCatching { restTemplate.getForObject(url, String::class.java) }
-                .onFailure { logger.error("관광 정보 조회 실패", it) }
+                .onFailure { log.error("관광 정보 조회 실패", it) }
                 .getOrNull()
 
         return body
@@ -61,7 +56,10 @@ class TourApiClient(
     }
 
     // 위치기반 관광정보 조회 (locationBasedList2)
-    fun fetchLocationBasedTours(params: LocationBasedParams): TourResponse {
+    fun fetchLocationBasedTours(
+        tourParams: TourParams,
+        locationParams: TourLocationBasedParams,
+    ): TourResponse {
         val url =
             UriComponentsBuilder.fromUri(URI.create(apiUrl))
                 .path("/locationBasedList2")
@@ -69,19 +67,19 @@ class TourApiClient(
                 .queryParam("MobileOS", "WEB")
                 .queryParam("MobileApp", "KoreaTravelGuide")
                 .queryParam("_type", "json")
-                .queryParam("mapX", params.mapX)
-                .queryParam("mapY", params.mapY)
-                .queryParam("radius", params.radius)
-                .queryParam("contentTypeId", params.contentTypeId)
-                .queryParam("areaCode", params.areaCode)
-                .queryParam("sigunguCode", params.sigunguCode)
+                .queryParam("mapX", locationParams.mapX)
+                .queryParam("mapY", locationParams.mapY)
+                .queryParam("radius", locationParams.radius)
+                .queryParam("contentTypeId", tourParams.contentTypeId)
+                .queryParam("areaCode", tourParams.areaCode)
+                .queryParam("sigunguCode", tourParams.sigunguCode)
                 .build()
                 .encode()
                 .toUri()
 
         val body =
             runCatching { restTemplate.getForObject(url, String::class.java) }
-                .onFailure { logger.error("위치기반 관광 정보 조회 실패", it) }
+                .onFailure { log.error("위치기반 관광 정보 조회 실패", it) }
                 .getOrNull()
 
         return body
@@ -91,7 +89,7 @@ class TourApiClient(
     }
 
     // 공통정보 조회 (detailCommon2)
-    fun fetchTourCommonDetail(params: TourDetailParams): TourDetailResponse {
+    fun fetchTourDetail(params: TourDetailParams): TourDetailResponse {
         val url =
             UriComponentsBuilder.fromUri(URI.create(apiUrl))
                 .path("/detailCommon2")
@@ -106,7 +104,7 @@ class TourApiClient(
 
         val body =
             runCatching { restTemplate.getForObject(url, String::class.java) }
-                .onFailure { logger.error("공통정보 조회 실패", it) }
+                .onFailure { log.error("공통정보 조회 실패", it) }
                 .getOrNull()
 
         return body
@@ -179,7 +177,7 @@ class TourApiClient(
                 .asText()
 
         if (resultCode != "0000") {
-            logger.warn("{} API resultCode={}", apiName, resultCode)
+            log.warn("{} API resultCode={}", apiName, resultCode)
             return emptyList()
         }
 

@@ -5,11 +5,8 @@ package com.back.koreaTravelGuide.domain.ai.tour.dto
  * 위치기반 관광정보 조회 요청 파라미터 (locationBasedList2)
  * 필수 좌표 값(mapX, mapY, radius)은 NonNull로 정의해 호출 시점에 무조건 전달되도록 보장한다.
  */
-data class LocationBasedParams(
-    val mapX: Double,
-    val mapY: Double,
-    val radius: Int,
-    val contentTypeId: String? = null,
-    val areaCode: String? = null,
-    val sigunguCode: String? = null,
+data class TourLocationBasedParams(
+    val mapX: String,
+    val mapY: String,
+    val radius: String,
 )
