@@ -6,6 +6,8 @@ import com.back.koreaTravelGuide.domain.userChat.chatmessage.dto.ChatMessageSend
 import com.back.koreaTravelGuide.domain.userChat.chatmessage.service.ChatMessageService
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,14 +25,16 @@ class ChatMessageController(
     @GetMapping("/{roomId}/messages")
     fun listMessages(
         @PathVariable roomId: Long,
+        @AuthenticationPrincipal requesterId: Long?,
         @RequestParam(required = false) after: Long?,
         @RequestParam(defaultValue = "50") limit: Int,
     ): ResponseEntity<ApiResponse<List<ChatMessageResponse>>> {
+        val memberId = requesterId ?: throw AccessDeniedException("인증이 필요합니다.")
         val messages =
             if (after == null) {
-                messageService.getlistbefore(roomId, limit)
+                messageService.getlistbefore(roomId, limit, memberId)
             } else {
-                messageService.getlistafter(roomId, after)
+                messageService.getlistafter(roomId, after, memberId)
             }
         val responseMessages = messages.map(ChatMessageResponse::from)
         return ResponseEntity.ok(ApiResponse(msg = "메시지 조회", data = responseMessages))
@@ -39,9 +43,11 @@ class ChatMessageController(
     @PostMapping("/{roomId}/messages")
     fun sendMessage(
         @PathVariable roomId: Long,
+        @AuthenticationPrincipal senderId: Long?,
         @RequestBody req: ChatMessageSendRequest,
     ): ResponseEntity<ApiResponse<ChatMessageResponse>> {
-        val saved = messageService.send(roomId, req.senderId, req.content)
+        val memberId = senderId ?: throw AccessDeniedException("인증이 필요합니다.")
+        val saved = messageService.send(roomId, memberId, req.content)
         val response = ChatMessageResponse.from(saved)
         messagingTemplate.convertAndSend(
             "/topic/userchat/$roomId",

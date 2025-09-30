@@ -3,9 +3,11 @@ package com.back.koreaTravelGuide.domain.userChat.chatroom.service
 import com.back.koreaTravelGuide.domain.userChat.chatmessage.repository.ChatMessageRepository
 import com.back.koreaTravelGuide.domain.userChat.chatroom.entity.ChatRoom
 import com.back.koreaTravelGuide.domain.userChat.chatroom.repository.ChatRoomRepository
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.util.NoSuchElementException
 
 @Service
 class ChatRoomService(
@@ -13,10 +15,12 @@ class ChatRoomService(
     private val messageRepository: ChatMessageRepository,
 ) {
     @Transactional
-    fun exceptOneToOneRoom(
+    fun checkOneToOneRoom(
         guideId: Long,
         userId: Long,
+        requesterId: Long,
     ): ChatRoom {
+        ensureParticipant(guideId, userId, requesterId)
         // 1) 기존 방 재사용
         roomRepository.findOneToOneRoom(guideId, userId)?.let { return it }
 
@@ -28,21 +32,46 @@ class ChatRoomService(
     }
 
     @Transactional(readOnly = true)
-    fun get(roomId: Long): ChatRoom =
-        roomRepository.findById(roomId)
-            .orElseThrow { NoSuchElementException("room not found: $roomId") }
+    fun get(
+        roomId: Long,
+        requesterId: Long,
+    ): ChatRoom {
+        val room =
+            roomRepository.findById(roomId)
+                .orElseThrow { NoSuchElementException("room not found: $roomId") }
+        ensureMember(room, requesterId)
+        return room
+    }
 
     @Transactional
     fun deleteByOwner(
         roomId: Long,
         requesterId: Long,
     ) {
-        val room = get(roomId)
+        val room = get(roomId, requesterId)
         if (room.userId != requesterId) {
-            // 예외처리 임시
-            throw IllegalArgumentException("채팅방 생성자만 삭제할 수 있습니다.")
+            throw AccessDeniedException("채팅방 생성자만 삭제할 수 있습니다.")
         }
         messageRepository.deleteByRoomId(roomId)
         roomRepository.deleteById(roomId)
+    }
+
+    private fun ensureParticipant(
+        guideId: Long,
+        userId: Long,
+        requesterId: Long,
+    ) {
+        if (guideId != requesterId && userId != requesterId) {
+            throw AccessDeniedException("채팅방은 참여자만 생성할 수 있습니다.")
+        }
+    }
+
+    private fun ensureMember(
+        room: ChatRoom,
+        requesterId: Long,
+    ) {
+        if (room.guideId != requesterId && room.userId != requesterId) {
+            throw AccessDeniedException("채팅방에 접근할 수 없습니다.")
+        }
     }
 }
