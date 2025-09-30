@@ -1,8 +1,8 @@
 package com.back.koreaTravelGuide.common.config
 
-import com.back.koreaTravelGuide.security.CustomOAuth2LoginSuccessHandler
-import com.back.koreaTravelGuide.security.CustomOAuth2UserService
-import com.back.koreaTravelGuide.security.JwtAuthenticationFilter
+import com.back.koreaTravelGuide.common.security.CustomOAuth2LoginSuccessHandler
+import com.back.koreaTravelGuide.common.security.CustomOAuth2UserService
+import com.back.koreaTravelGuide.common.security.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment

@@ -13,7 +13,8 @@ import jakarta.persistence.Table
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Entity
 @Table(name = "users")
@@ -41,8 +42,8 @@ class User(
     var description: String? = null,
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
     @LastModifiedDate
     @Column(name = "last_login_at")
-    var lastLoginAt: LocalDateTime = LocalDateTime.now(),
+    var lastLoginAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
 )
