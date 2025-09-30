@@ -16,10 +16,7 @@ class WeatherService(
         return weatherServiceCore.fetchMidForecast(actualBaseTime)
     }
 
-    fun getTemperatureAndLandForecast(location: String?): List<TemperatureAndLandForecastDto>? {
-        val actualLocation = location ?: "서울"
-        val actualRegionCode = tools.getRegionCodeFromLocation(actualLocation)
-
+    fun getTemperatureAndLandForecast(actualRegionCode: String): List<TemperatureAndLandForecastDto>? {
         val actualBaseTime = tools.getCurrentBaseTime()
 
         return weatherServiceCore.fetchTemperatureAndLandForecast(actualRegionCode, actualBaseTime)
