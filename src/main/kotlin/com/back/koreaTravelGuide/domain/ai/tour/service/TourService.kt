@@ -1,7 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.tour.service
 
 import com.back.koreaTravelGuide.domain.ai.tour.client.TourApiClient
-import com.back.koreaTravelGuide.domain.ai.tour.dto.LocationBasedSearchParams
+import com.back.koreaTravelGuide.domain.ai.tour.dto.LocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailResponse
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourParams
@@ -24,8 +24,8 @@ class TourService(
         return tours
     }
 
-    fun fetchLocationBasedTours(locationBasedSearchParams: LocationBasedSearchParams): TourResponse {
-        return tourApiClient.fetchLocationBasedTours(locationBasedSearchParams)
+    fun fetchLocationBasedTours(locationBasedParams: LocationBasedParams): TourResponse {
+        return tourApiClient.fetchLocationBasedTours(locationBasedParams)
     }
 
     fun fetchTourCommonDetail(params: TourDetailParams): TourDetailResponse {

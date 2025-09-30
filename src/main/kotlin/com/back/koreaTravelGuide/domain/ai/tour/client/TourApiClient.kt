@@ -1,6 +1,6 @@
 package com.back.koreaTravelGuide.domain.ai.tour.client
 
-import com.back.koreaTravelGuide.domain.ai.tour.dto.LocationBasedSearchParams
+import com.back.koreaTravelGuide.domain.ai.tour.dto.LocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailItem
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailResponse
@@ -61,7 +61,7 @@ class TourApiClient(
     }
 
     // 위치기반 관광정보 조회 (locationBasedList2)
-    fun fetchLocationBasedTours(params: LocationBasedSearchParams): TourResponse {
+    fun fetchLocationBasedTours(params: LocationBasedParams): TourResponse {
         val url =
             UriComponentsBuilder.fromUri(URI.create(apiUrl))
                 .path("/locationBasedList2")
