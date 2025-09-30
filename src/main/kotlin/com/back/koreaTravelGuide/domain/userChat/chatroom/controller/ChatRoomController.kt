@@ -1,11 +1,12 @@
 package com.back.koreaTravelGuide.domain.userChat.chatroom.controller
 
 import com.back.koreaTravelGuide.common.ApiResponse
-import com.back.koreaTravelGuide.domain.userChat.chatroom.dto.ChatRoomDeleteRequest
 import com.back.koreaTravelGuide.domain.userChat.chatroom.dto.ChatRoomResponse
 import com.back.koreaTravelGuide.domain.userChat.chatroom.dto.ChatRoomStartRequest
 import com.back.koreaTravelGuide.domain.userChat.chatroom.service.ChatRoomService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,26 +23,31 @@ class ChatRoomController(
     // 같은 페어는 방 재사용
     @PostMapping("/start")
     fun startChat(
+        @AuthenticationPrincipal requesterId: Long?,
         @RequestBody req: ChatRoomStartRequest,
     ): ResponseEntity<ApiResponse<ChatRoomResponse>> {
-        val room = roomService.exceptOneToOneRoom(req.guideId, req.userId)
+        val authenticatedId = requesterId ?: throw AccessDeniedException("인증이 필요합니다.")
+        val room = roomService.checkOneToOneRoom(req.guideId, req.userId, authenticatedId)
         return ResponseEntity.ok(ApiResponse(msg = "채팅방 시작", data = ChatRoomResponse.from(room)))
     }
 
     @DeleteMapping("/{roomId}")
     fun deleteRoom(
         @PathVariable roomId: Long,
-        @RequestBody req: ChatRoomDeleteRequest,
+        @AuthenticationPrincipal requesterId: Long?,
     ): ResponseEntity<ApiResponse<Unit>> {
-        roomService.deleteByOwner(roomId, req.userId)
+        val authenticatedId = requesterId ?: throw AccessDeniedException("인증이 필요합니다.")
+        roomService.deleteByOwner(roomId, authenticatedId)
         return ResponseEntity.ok(ApiResponse("채팅방 삭제 완료"))
     }
 
     @GetMapping("/{roomId}")
     fun get(
         @PathVariable roomId: Long,
+        @AuthenticationPrincipal requesterId: Long?,
     ): ResponseEntity<ApiResponse<ChatRoomResponse>> {
-        val room = roomService.get(roomId)
+        val authenticatedId = requesterId ?: throw AccessDeniedException("인증이 필요합니다.")
+        val room = roomService.get(roomId, authenticatedId)
         return ResponseEntity.ok(ApiResponse(msg = "채팅방 조회", data = ChatRoomResponse.from(room)))
     }
 }

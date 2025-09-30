@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.userChat.config
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
@@ -10,7 +11,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-class UserChatWebSocketConfig : WebSocketMessageBrokerConfigurer {
+class UserChatWebSocketConfig(
+    private val userChatStompAuthChannelInterceptor: UserChatStompAuthChannelInterceptor,
+) : WebSocketMessageBrokerConfigurer {
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry.addEndpoint("/ws/userchat")
             .setAllowedOriginPatterns("*")
@@ -20,5 +23,9 @@ class UserChatWebSocketConfig : WebSocketMessageBrokerConfigurer {
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
         registry.enableSimpleBroker("/topic")
         registry.setApplicationDestinationPrefixes("/pub")
+    }
+
+    override fun configureClientInboundChannel(registration: ChannelRegistration) {
+        registration.interceptors(userChatStompAuthChannelInterceptor)
     }
 }
