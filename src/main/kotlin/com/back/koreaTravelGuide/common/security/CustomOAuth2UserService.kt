@@ -1,4 +1,4 @@
-package com.back.koreaTravelGuide.security
+package com.back.koreaTravelGuide.common.security
 
 import com.back.koreaTravelGuide.domain.user.entity.User
 import com.back.koreaTravelGuide.domain.user.enums.UserRole
@@ -43,11 +43,14 @@ class CustomOAuth2UserService(
 
         val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.name}"))
 
+        val userNameAttributeName = userRequest.clientRegistration.providerDetails.userInfoEndpoint.userNameAttributeName
+
         return CustomOAuth2User(
             id = user.id!!,
             email = user.email,
             authorities = authorities,
             attributes = attributes,
+            nameAttributeKey = userNameAttributeName,
         )
     }
 

@@ -76,7 +76,6 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
   security:
     oauth2:
@@ -174,3 +173,4 @@ management:
 jwt:
   secret-key: ${CUSTOM__JWT__SECRET_KEY:dev-secret-key-for-local-testing-please-change}
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:60}
+  refresh-token-expiration-days: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:7}
