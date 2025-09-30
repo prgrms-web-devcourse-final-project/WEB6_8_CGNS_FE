@@ -1,10 +1,10 @@
 package com.back.koreaTravelGuide.common.security
 
+import com.back.koreaTravelGuide.common.logging.log
 import com.back.koreaTravelGuide.domain.user.enums.UserRole
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -20,10 +20,7 @@ class JwtTokenProvider(
     @Value("\${jwt.access-token-expiration-minutes}") private val accessTokenExpirationMinutes: Long,
     @Value("\${jwt.refresh-token-expiration-days}") private val refreshTokenExpirationDays: Long,
 ) {
-    private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
-
     private val key: SecretKey by lazy {
-
         Keys.hmacShaKeyFor(Base64.getEncoder().encode(secretKey.toByteArray()))
     }
 
@@ -76,7 +73,7 @@ class JwtTokenProvider(
 
             return true
         } catch (e: Exception) {
-            logger.error("Token validation error: ${e.message}")
+            log.error("Token validation error: ${e.message}")
 
             return false
         }

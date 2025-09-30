@@ -39,8 +39,6 @@ class CustomOAuth2LoginSuccessHandler(
 
             redirectStrategy.sendRedirect(request, response, targetUrl)
         } else {
-            val accessToken = jwtTokenProvider.createAccessToken(user.id!!, user.role)
-
             val refreshToken = jwtTokenProvider.createRefreshToken(user.id!!)
 
             val redisKey = "refreshToken:${user.id}"
@@ -60,7 +58,7 @@ class CustomOAuth2LoginSuccessHandler(
 
             response.addCookie(cookie)
 
-            val targetUrl = "http://localhost:3000/oauth/callback?accessToken=$accessToken"
+            val targetUrl = "http://localhost:3000/oauth/callback"
 
             redirectStrategy.sendRedirect(request, response, targetUrl)
         }
