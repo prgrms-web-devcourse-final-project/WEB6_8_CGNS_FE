@@ -38,7 +38,6 @@ class GuideController(
         return ResponseEntity.ok(ApiResponse("가이드 정보를 성공적으로 조회했습니다.", guide))
     }
 
-    // 가이드는 회원가입 후 프로필 수정을 통해 필드 입력 받음
     @Operation(summary = "가이드 프로필 수정")
     @PreAuthorize("hasRole('GUIDE')")
     @PatchMapping("/me")
