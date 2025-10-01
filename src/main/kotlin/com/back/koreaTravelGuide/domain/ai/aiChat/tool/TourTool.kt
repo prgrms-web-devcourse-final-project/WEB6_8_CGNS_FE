@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.aiChat.tool
 
 import com.back.backend.BuildConfig
+import com.back.koreaTravelGuide.common.logging.log
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourLocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.service.TourService
@@ -9,7 +10,7 @@ import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.stereotype.Component
 
 @Component
-class TourToolExample(
+class TourTool(
     private val tourService: TourService,
 ) {
     /**
@@ -21,17 +22,18 @@ class TourToolExample(
      */
 
     @Tool(description = "areaBasedList2 : 지역기반 관광정보 조회, 특정 지역의 관광 정보 조회")
-    fun getTourInfo(
+    fun getAreaBasedTourInfo(
         @ToolParam(description = BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION, required = true)
         contentTypeId: String,
         @ToolParam(description = BuildConfig.AREA_CODES_DESCRIPTION, required = true)
         areaAndSigunguCode: String,
     ): String {
-        // areaAndSigunguCode를 areaCode와 sigunguCode로 분리
-        val tourParams = tourService.parseParams(contentTypeId, areaAndSigunguCode)
+        log.info("🔧 [TOOL CALLED] getAreaBasedTourInfo - contentTypeId: $contentTypeId, areaAndSigunguCode: $areaAndSigunguCode")
 
+        val tourParams = tourService.parseParams(contentTypeId, areaAndSigunguCode)
         val tourInfo = tourService.fetchTours(tourParams)
 
+        log.info("✅ [TOOL RESULT] getAreaBasedTourInfo - 결과: ${tourInfo.toString().take(100)}...")
         return tourInfo.toString() ?: "지역기반 관광정보 조회를 가져올 수 없습니다."
     }
 
@@ -47,7 +49,7 @@ class TourToolExample(
      */
 
     @Tool(description = "locationBasedList2 : 위치기반 관광정보 조회, 특정 위치 기반의 관광 정보 조회")
-    fun get(
+    fun getLocationBasedTourInfo(
         @ToolParam(description = BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION, required = true)
         contentTypeId: String,
         @ToolParam(description = BuildConfig.AREA_CODES_DESCRIPTION, required = true)
@@ -59,30 +61,37 @@ class TourToolExample(
         @ToolParam(description = "검색 반경(m)", required = true)
         radius: String = "100",
     ): String {
-        // areaAndSigunguCode를 areaCode와 sigunguCode로 분리
+        log.info(
+            "🔧 [TOOL CALLED] getLocationBasedTourInfo - " +
+                "contentTypeId: $contentTypeId, area: $areaAndSigunguCode, " +
+                "mapX: $mapX, mapY: $mapY, radius: $radius",
+        )
+
         val tourParams = tourService.parseParams(contentTypeId, areaAndSigunguCode)
         val locationBasedParams = TourLocationBasedParams(mapX, mapY, radius)
-
         val tourLocationBasedInfo = tourService.fetchLocationBasedTours(tourParams, locationBasedParams)
 
+        log.info("✅ [TOOL RESULT] getLocationBasedTourInfo - 결과: ${tourLocationBasedInfo.toString().take(100)}...")
         return tourLocationBasedInfo.toString() ?: "위치기반 관광정보 조회를 가져올 수 없습니다."
     }
 
     /**
      * fetchTourDetail - 상세조회
-     * 케이스 : 콘텐츠ID가 “126128”인 관광정보의 “상베 정보” 조회
+     * 케이스 : 콘텐츠ID가 "126128"인 관광정보의 "상베 정보" 조회
      * "contentid": "127974",
      */
 
     @Tool(description = "detailCommon2 : 관광정보 상세조회, 특정 관광 정보의 상세 정보 조회")
-    fun get(
+    fun getTourDetailInfo(
         @ToolParam(description = "Tour API Item에 각각 할당된 contentId", required = true)
         contentId: String = "127974",
     ): String {
-        val tourDetailParams = TourDetailParams(contentId)
+        log.info("🔧 [TOOL CALLED] getTourDetailInfo - contentId: $contentId")
 
+        val tourDetailParams = TourDetailParams(contentId)
         val tourDetailInfo = tourService.fetchTourDetail(tourDetailParams)
 
+        log.info("✅ [TOOL RESULT] getTourDetailInfo - 결과: ${tourDetailInfo.toString().take(100)}...")
         return tourDetailInfo.toString() ?: "관광정보 상세조회를 가져올 수 없습니다."
     }
 }
