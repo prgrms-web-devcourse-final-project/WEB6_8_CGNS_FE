@@ -1,8 +1,11 @@
 package com.back.koreaTravelGuide.domain.userChat.chatroom.service
 
 import com.back.koreaTravelGuide.domain.userChat.chatmessage.repository.ChatMessageRepository
+import com.back.koreaTravelGuide.domain.userChat.chatroom.dto.ChatRoomListResponse
+import com.back.koreaTravelGuide.domain.userChat.chatroom.dto.ChatRoomResponse
 import com.back.koreaTravelGuide.domain.userChat.chatroom.entity.ChatRoom
 import com.back.koreaTravelGuide.domain.userChat.chatroom.repository.ChatRoomRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,6 +63,47 @@ class ChatRoomService(
         }
         messageRepository.deleteByRoomId(roomId)
         roomRepository.deleteById(roomId)
+    }
+
+    @Transactional(readOnly = true)
+    fun listRooms(
+        requesterId: Long,
+        limit: Int,
+        cursor: String?,
+    ): ChatRoomListResponse {
+        val (cursorUpdatedAt, cursorRoomId) = parseCursor(cursor)
+        val pageable = PageRequest.of(0, limit)
+        val rooms = roomRepository.findPagedByMember(requesterId, cursorUpdatedAt, cursorRoomId, pageable)
+        val roomResponses = rooms.map(ChatRoomResponse::from)
+        val nextCursor =
+            if (roomResponses.size < limit) {
+                null
+            } else {
+                roomResponses.lastOrNull()?.let { last ->
+                    last.id?.let { "${last.updatedAt}|$it" }
+                }
+            }
+
+        return ChatRoomListResponse(
+            rooms = roomResponses,
+            nextCursor = nextCursor,
+        )
+    }
+
+    private fun parseCursor(cursor: String?): Pair<ZonedDateTime?, Long?> {
+        if (cursor.isNullOrBlank()) {
+            return null to null
+        }
+
+        val parts = cursor.split("|")
+        if (parts.size != 2) {
+            return null to null
+        }
+
+        val updatedAt = runCatching { ZonedDateTime.parse(parts[0]) }.getOrNull()
+        val roomId = runCatching { parts[1].toLong() }.getOrNull()
+
+        return updatedAt to roomId
     }
 
     private fun checkParticipant(
