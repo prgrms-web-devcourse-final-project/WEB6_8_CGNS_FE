@@ -59,8 +59,9 @@ class TourService(
     // API 호출 2, 위치기반 관광정보 조회 - locationBasedList2
     @Cacheable(
         "tourLocationBased",
-        key = "#tourParams.contentTypeId + '_' + #tourParams.areaCode + '_' + #tourParams.sigunguCode + " +
-            "'_' + #locationParams.mapX + '_' + #locationParams.mapY + '_' + #locationParams.radius",
+        key =
+            "#tourParams.contentTypeId + '_' + #tourParams.areaCode + '_' + #tourParams.sigunguCode + " +
+                "'_' + #locationParams.mapX + '_' + #locationParams.mapY + '_' + #locationParams.radius",
     )
     fun fetchLocationBasedTours(
         tourParams: TourParams,

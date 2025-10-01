@@ -24,18 +24,20 @@ class TourTool(
     @Tool(description = "areaBasedList2 : 지역기반 관광정보 조회, 특정 지역의 관광 정보 조회")
     fun getAreaBasedTourInfo(
         @ToolParam(
-            description = "관광 타입 코드를 사용하세요. 사용자가 타입 이름을 말하면 해당하는 코드를 찾아서 사용해야 합니다. " +
-                "예: 사용자가 '관광지'라고 하면 '12'를 사용하세요. " +
-                "사용 가능한 타입 코드: ${BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION}",
+            description =
+                "관광 타입 코드를 사용하세요. 사용자가 타입 이름을 말하면 해당하는 코드를 찾아서 사용해야 합니다. " +
+                    "예: 사용자가 '관광지'라고 하면 '12'를 사용하세요. " +
+                    "사용 가능한 타입 코드: ${BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION}",
             required = true,
         )
         contentTypeId: String,
         @ToolParam(
-            description = "지역 코드를 쉼표(,)로 구분해서 사용하세요. " +
-                "예: 사용자가 '서울 강남구'라고 하면 AREA_CODES에서 '서울-강남구: 1-1'을 찾고, " +
-                "하이픈(-)을 쉼표(,)로 바꿔서 '1,1'을 사용하세요. " +
-                "광역시(인천, 대전 등)는 단일 코드만 사용: 예: '인천' → '2' (쉼표 없음). " +
-                "사용 가능한 지역 코드: ${BuildConfig.AREA_CODES_DESCRIPTION}",
+            description =
+                "지역 코드를 쉼표(,)로 구분해서 사용하세요. " +
+                    "예: 사용자가 '서울 강남구'라고 하면 AREA_CODES에서 '서울-강남구: 1-1'을 찾고, " +
+                    "하이픈(-)을 쉼표(,)로 바꿔서 '1,1'을 사용하세요. " +
+                    "광역시(인천, 대전 등)는 단일 코드만 사용: 예: '인천' → '2' (쉼표 없음). " +
+                    "사용 가능한 지역 코드: ${BuildConfig.AREA_CODES_DESCRIPTION}",
             required = true,
         )
         areaAndSigunguCode: String,
@@ -63,17 +65,19 @@ class TourTool(
     @Tool(description = "locationBasedList2 : 위치기반 관광정보 조회, 특정 위치 기반의 관광 정보 조회")
     fun getLocationBasedTourInfo(
         @ToolParam(
-            description = "관광 타입 코드를 사용하세요. 사용자가 타입 이름을 말하면 해당하는 코드를 찾아서 사용해야 합니다. " +
-                "예: 사용자가 '음식점'이라고 하면 '39'를 사용하세요. " +
-                "사용 가능한 타입 코드: ${BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION}",
+            description =
+                "관광 타입 코드를 사용하세요. 사용자가 타입 이름을 말하면 해당하는 코드를 찾아서 사용해야 합니다. " +
+                    "예: 사용자가 '음식점'이라고 하면 '39'를 사용하세요. " +
+                    "사용 가능한 타입 코드: ${BuildConfig.CONTENT_TYPE_CODES_DESCRIPTION}",
             required = true,
         )
         contentTypeId: String,
         @ToolParam(
-            description = "지역 코드를 쉼표(,)로 구분해서 사용하세요. " +
-                "예: 사용자가 '서울 중구'라고 하면 AREA_CODES에서 '서울-중구: 1-24'를 찾고, " +
-                "하이픈(-)을 쉼표(,)로 바꿔서 '1,24'를 사용하세요. " +
-                "사용 가능한 지역 코드: ${BuildConfig.AREA_CODES_DESCRIPTION}",
+            description =
+                "지역 코드를 쉼표(,)로 구분해서 사용하세요. " +
+                    "예: 사용자가 '서울 중구'라고 하면 AREA_CODES에서 '서울-중구: 1-24'를 찾고, " +
+                    "하이픈(-)을 쉼표(,)로 바꿔서 '1,24'를 사용하세요. " +
+                    "사용 가능한 지역 코드: ${BuildConfig.AREA_CODES_DESCRIPTION}",
             required = true,
         )
         areaAndSigunguCode: String,
@@ -107,8 +111,9 @@ class TourTool(
     @Tool(description = "detailCommon2 : 관광정보 상세조회, 특정 관광 정보의 상세 정보 조회")
     fun getTourDetailInfo(
         @ToolParam(
-            description = "조회할 관광정보의 콘텐츠 ID. " +
-                "이전 Tool 호출 결과(getAreaBasedTourInfo 또는 getLocationBasedTourInfo)에서 받은 contentId를 사용하세요.",
+            description =
+                "조회할 관광정보의 콘텐츠 ID. " +
+                    "이전 Tool 호출 결과(getAreaBasedTourInfo 또는 getLocationBasedTourInfo)에서 받은 contentId를 사용하세요.",
             required = true,
         )
         contentId: String = "127974",
