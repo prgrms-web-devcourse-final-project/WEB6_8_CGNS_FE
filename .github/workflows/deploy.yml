@@ -55,7 +55,10 @@ jobs:
         with:
           context: . # 디렉토리를 Docker build context로 지정
           push: true #빌드 후 레지스트리에 푸시
+<<<<<<< HEAD
           platforms: linux/amd64,linux/arm64  # 멀티 아키텍처 이미지 빌드
+=======
+>>>>>>> d35a515 (Add backend as part of main repository)
           tags: | #이미지에 붙일 태그
             ghcr.io/${{ env.OWNER_LC }}/deploy:${{ needs.makeTagAndRelease.outputs.tag_name }},
             ghcr.io/${{ env.OWNER_LC }}/deploy:latest
