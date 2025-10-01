@@ -4,7 +4,10 @@
 
 ### 1. Redis 서버 실행 (Docker 추천)
 ```bash
-# Redis 서버 시작
+# Redis 서버 시작 (비밀번호 설정 + 데이터 영속화) - 한 줄 복붙
+docker run -d --name redis --restart unless-stopped -p 6379:6379 -e TZ=Asia/Seoul -v redis_data:/data redis:alpine --requirepass 'your_password_here'
+
+# 간단 버전 (비밀번호 없음)
 docker run -d -p 6379:6379 --name redis redis:alpine
 
 # Redis 중지
@@ -12,6 +15,12 @@ docker stop redis
 
 # Redis 재시작
 docker start redis
+
+# Redis 로그 확인
+docker logs redis
+
+# Redis 완전 삭제 (데이터 포함)
+docker rm -f redis && docker volume rm redis_data
 ```
 
 ### 2. 환경변수 설정
@@ -19,7 +28,8 @@ docker start redis
 # .env 파일 생성 (.env.example 복사)
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=
+REDIS_PASSWORD=your_password_here  # 비밀번호 설정한 경우
+# REDIS_PASSWORD=                  # 비밀번호 없으면 빈 값
 ```
 
 ## 💾 캐시 사용법
@@ -129,18 +139,29 @@ GET http://localhost:8080/actuator/health
 
 ### Redis CLI 접속
 ```bash
-# Docker 컨테이너 접속
+# Docker 컨테이너 접속 (비밀번호 없는 경우)
 docker exec -it redis redis-cli
+
+# Docker 컨테이너 접속 (비밀번호 있는 경우)
+docker exec -it redis redis-cli -a 'your_password_here'
+
+# 또는 접속 후 인증
+docker exec -it redis redis-cli
+> AUTH your_password_here
 
 # 캐시 확인
 > KEYS *
 > GET "weather::서울"
-> TTL "weather::서울"  # 남은 시간 확인
+> TTL "weather::서울"  # 남은 시간 확인 (초 단위)
+> DEL "weather::서울"  # 특정 캐시 삭제
+> FLUSHALL  # 모든 캐시 삭제
 ```
 
 ## 🚨 주의사항
 
 1. **개발용**: Redis 없어도 실행됨 (`session.store-type: none`)
-2. **캐시 키**: 특수문자 주의 (`::` 구분자 사용)
-3. **TTL**: 적절한 캐시 시간 설정 (API 호출량 고려)
-4. **메모리**: Redis 메모리 사용량 모니터링 필요
+2. **비밀번호**: 운영 환경에서는 반드시 강력한 비밀번호 설정 권장
+3. **데이터 영속화**: `-v redis_data:/data` 옵션으로 컨테이너 재시작 시에도 데이터 보존
+4. **캐시 키**: 특수문자 주의 (`::` 구분자 사용)
+5. **TTL**: 적절한 캐시 시간 설정 (API 호출량 고려)
+6. **메모리**: Redis 메모리 사용량 모니터링 필요
