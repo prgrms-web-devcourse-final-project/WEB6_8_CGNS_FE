@@ -1,0 +1,31 @@
+name: deploy.yml
+on:
+  push:
+    paths: # 특정 경로에 변경이 있을 때만 워크플로우 실행
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'Dockerfile'
+    branches:
+      - main # main 브랜치에 푸시될 때마다 워크플로우 실행
+jobs:
+  build-and-deploy: # 잡 이름, 각 잡들은 의존성이 없으면 병렬로 실행
+    runs-on: ubuntu-latest # 최신 우분투에서 실행
+    steps: # 아래 명령어들 순차 실행
+      - uses: actions/checkout@v4 # 레포지토리 코드를 워크플로우 실행 환경에 체크아웃(복사)
+      - name: Create Tag
+        id: create_tag
+        uses: mathieudutour/github-tag-action@v6.2 # 태그 생성 액션 사용. 태그 - 0.0.1 ~
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1 # 릴리즈 생성 액션 사용
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create_tag.outputs.new_tag }} # 새로 생성된 태그 사용
+          release_name: Release ${{ steps.create_tag.outputs.new_tag }}
+          body: ${{ steps.create_tag.outputs.changelog }}
+          draft: false
+          prerelease: false
