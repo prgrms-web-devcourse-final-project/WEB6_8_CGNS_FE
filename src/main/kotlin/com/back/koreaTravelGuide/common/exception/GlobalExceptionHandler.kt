@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
  * @Valid 검증 실패 → 400
  * throw IllegalArgumentException("메시지") → 400
  * throw NoSuchElementException("메시지") → 404
+ * throw IllegalStateException("메시지") → 409
  * 기타 모든 예외 → 500
  */
 @ControllerAdvice
@@ -39,6 +40,12 @@ class GlobalExceptionHandler {
     fun handleNoSuchElement(ex: NoSuchElementException): ResponseEntity<ApiResponse<Void>> {
         logger.warn("데이터 없음: {}", ex.message)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse(ex.message ?: "데이터를 찾을 수 없습니다"))
+    }
+
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalState(ex: IllegalStateException): ResponseEntity<ApiResponse<Void>> {
+        logger.warn("부적절한 상태: {}", ex.message)
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse(ex.message ?: "요청을 처리할 수 없는 상태입니다"))
     }
 
     @ExceptionHandler(Exception::class)
