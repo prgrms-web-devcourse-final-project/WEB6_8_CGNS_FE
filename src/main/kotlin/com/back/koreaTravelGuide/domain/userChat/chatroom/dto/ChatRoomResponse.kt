@@ -1,14 +1,15 @@
 package com.back.koreaTravelGuide.domain.userChat.chatroom.dto
 
 import com.back.koreaTravelGuide.domain.userChat.chatroom.entity.ChatRoom
-import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 data class ChatRoomResponse(
     val id: Long?,
     val title: String,
     val guideId: Long,
     val userId: Long,
-    val updatedAt: Instant,
+    val updatedAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
     val lastMessageId: Long?,
 ) {
     companion object {

@@ -6,7 +6,8 @@ import com.back.koreaTravelGuide.domain.userChat.chatroom.repository.ChatRoomRep
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.NoSuchElementException
 
 @Service
@@ -15,7 +16,7 @@ class ChatRoomService(
     private val messageRepository: ChatMessageRepository,
 ) {
     @Transactional
-    fun checkOneToOneRoom(
+    fun createOneToOneRoom(
         guideId: Long,
         userId: Long,
         requesterId: Long,
@@ -27,7 +28,12 @@ class ChatRoomService(
         // 2) 없으면 생성 (동시요청은 DB 유니크 인덱스로 가드)
         val title = "Guide-$guideId · User-$userId"
         return roomRepository.save(
-            ChatRoom(title = title, guideId = guideId, userId = userId, updatedAt = Instant.now()),
+            ChatRoom(
+                title = title,
+                guideId = guideId,
+                userId = userId,
+                updatedAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
+            ),
         )
     }
 
