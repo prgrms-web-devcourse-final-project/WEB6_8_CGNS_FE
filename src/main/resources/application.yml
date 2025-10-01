@@ -73,9 +73,9 @@ spring:
     store-type: none  # Redis 없어도 실행 가능하도록 변경
     timeout: 30m
   # Redis 자동 설정 비활성화 (세션 비활성화용)
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+#  autoconfigure: #이거 설정하면 운영 환경에서 레디스 세션 작동 안됨
+#    exclude:
+#      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 
   security:
     oauth2:
@@ -130,7 +130,7 @@ springdoc:
 # Weather API 설정
 weather:
   api:
-    key: ${WEATHER_API_KEY}
+    key: ${WEATHER__API__KEY}
     base-url: https://apihub.kma.go.kr/api/typ02/openApi/MidFcstInfoService
 
 # Tour API 설정
