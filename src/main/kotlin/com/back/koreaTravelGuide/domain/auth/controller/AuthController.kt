@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.auth.controller
 
 import com.back.koreaTravelGuide.common.ApiResponse
+import com.back.koreaTravelGuide.common.security.getUserId
 import com.back.koreaTravelGuide.domain.auth.dto.request.UserRoleUpdateRequest
 import com.back.koreaTravelGuide.domain.auth.dto.response.AccessTokenResponse
 import com.back.koreaTravelGuide.domain.auth.dto.response.LoginResponse
@@ -10,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -45,9 +46,10 @@ class AuthController(
     @Operation(summary = "신규 사용자 역할 선택")
     @PostMapping("/role")
     fun updateUserRole(
-        @AuthenticationPrincipal userId: Long,
+        authentication: Authentication,
         @RequestBody request: UserRoleUpdateRequest,
     ): ResponseEntity<ApiResponse<LoginResponse>> {
+        val userId = authentication.getUserId()
         val loginResponse = authService.updateRoleAndLogin(userId, request.role)
         return ResponseEntity.ok(ApiResponse("역할이 선택되었으며 로그인에 성공했습니다.", loginResponse))
     }

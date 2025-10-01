@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.guide.controller
 
 import com.back.koreaTravelGuide.common.ApiResponse
+import com.back.koreaTravelGuide.common.security.getUserId
 import com.back.koreaTravelGuide.domain.guide.service.GuideService
 import com.back.koreaTravelGuide.domain.user.dto.request.GuideUpdateRequest
 import com.back.koreaTravelGuide.domain.user.dto.response.GuideResponse
@@ -8,7 +9,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -42,9 +43,10 @@ class GuideController(
     @PreAuthorize("hasRole('GUIDE')")
     @PatchMapping("/me")
     fun updateMyGuideProfile(
-        @AuthenticationPrincipal guideId: Long,
+        authentication: Authentication,
         @RequestBody request: GuideUpdateRequest,
     ): ResponseEntity<ApiResponse<GuideResponse>> {
+        val guideId = authentication.getUserId()
         val updatedGuideProfile = guideService.updateGuideProfile(guideId, request)
         return ResponseEntity.ok(ApiResponse("가이드 정보가 성공적으로 수정되었습니다.", updatedGuideProfile))
     }
