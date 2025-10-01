@@ -9,6 +9,7 @@ import com.back.koreaTravelGuide.domain.ai.tour.dto.TourLocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourResponse
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 // 09.26 양현준
@@ -36,6 +37,10 @@ class TourService(
     }
 
     // API 호출 1, 지역기반 관광정보 조회 - areaBasedList2
+    @Cacheable(
+        "tourAreaBased",
+        key = "#tourParams.contentTypeId + '_' + #tourParams.areaCode + '_' + #tourParams.sigunguCode",
+    )
     fun fetchTours(tourParams: TourParams): TourResponse {
         // 09.30 테스트용 하드코딩
         if (
@@ -52,6 +57,11 @@ class TourService(
     }
 
     // API 호출 2, 위치기반 관광정보 조회 - locationBasedList2
+    @Cacheable(
+        "tourLocationBased",
+        key = "#tourParams.contentTypeId + '_' + #tourParams.areaCode + '_' + #tourParams.sigunguCode + " +
+            "'_' + #locationParams.mapX + '_' + #locationParams.mapY + '_' + #locationParams.radius",
+    )
     fun fetchLocationBasedTours(
         tourParams: TourParams,
         locationParams: TourLocationBasedParams,
@@ -72,6 +82,7 @@ class TourService(
     }
 
     // APi 호출 3, 관광정보 상세조회 - detailCommon2
+    @Cacheable("tourDetail", key = "#detailParams.contentId")
     fun fetchTourDetail(detailParams: TourDetailParams): TourDetailResponse {
         // 09.30 테스트용 하드코딩
         if (
