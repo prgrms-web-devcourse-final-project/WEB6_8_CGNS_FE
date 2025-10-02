@@ -73,3 +73,6 @@ dump.rdb
 ### Coverage reports ###
 build/reports/
 coverage/
+
+# Test file
+index.html
