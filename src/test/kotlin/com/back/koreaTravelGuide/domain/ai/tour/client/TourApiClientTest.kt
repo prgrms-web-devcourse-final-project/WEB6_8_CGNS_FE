@@ -1,7 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.tour.client
 
 import com.back.koreaTravelGuide.KoreaTravelGuideApplication
-import com.back.koreaTravelGuide.domain.ai.tour.dto.TourSearchParams
+import com.back.koreaTravelGuide.domain.ai.tour.dto.TourParams
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -27,9 +27,7 @@ class TourApiClientTest {
     @Test
     fun fetchTourInfoTest() {
         val params =
-            TourSearchParams(
-                numOfRows = 1,
-                pageNo = 1,
+            TourParams(
                 contentTypeId = "12",
                 areaCode = "1",
                 sigunguCode = "1",
@@ -47,9 +45,7 @@ class TourApiClientTest {
     @Test
     fun fetchTourInfoEmptyTest() {
         val params =
-            TourSearchParams(
-                numOfRows = 1,
-                pageNo = 1,
+            TourParams(
                 contentTypeId = "12",
                 areaCode = "1",
                 sigunguCode = "1",
