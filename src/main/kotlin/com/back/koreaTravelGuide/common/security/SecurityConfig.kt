@@ -21,7 +21,8 @@ class SecurityConfig(
 ) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        val isDev = environment.activeProfiles.contains("dev")
+        val isDev = environment.getProperty("spring.profiles.active")?.contains("dev") == true ||
+                    environment.activeProfiles.contains("dev")
 
         http {
             csrf { disable() }

@@ -1,5 +1,7 @@
 package com.back.koreaTravelGuide.domain.ai.tour.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /**
  * 9.27 양현준
  * 관광 정보 응답 DTO
@@ -41,7 +43,9 @@ data class TourItem(
     // 시군구코드
     val sigunguCode: String?,
     // 법정동 시도 코드
+    @get:JsonProperty("lDongRegnCd")
     val lDongRegnCd: String?,
     // 법정동 시군구 코드
+    @get:JsonProperty("lDongSignguCd")
     val lDongSignguCd: String?,
 )

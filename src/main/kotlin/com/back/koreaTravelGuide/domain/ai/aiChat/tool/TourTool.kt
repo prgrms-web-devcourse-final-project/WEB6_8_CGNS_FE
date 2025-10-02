@@ -5,6 +5,7 @@ import com.back.koreaTravelGuide.common.logging.log
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourDetailParams
 import com.back.koreaTravelGuide.domain.ai.tour.dto.TourLocationBasedParams
 import com.back.koreaTravelGuide.domain.ai.tour.service.TourService
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.stereotype.Component
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class TourTool(
     private val tourService: TourService,
+    private val objectMapper: ObjectMapper,
 ) {
     /**
      * fetchTours - 지역기반 관광정보 조회
@@ -47,8 +49,14 @@ class TourTool(
         val tourParams = tourService.parseParams(contentTypeId, areaAndSigunguCode)
         val tourInfo = tourService.fetchTours(tourParams)
 
-        log.info("✅ [TOOL RESULT] getAreaBasedTourInfo - 결과: ${tourInfo.toString().take(100)}...")
-        return tourInfo.toString() ?: "지역기반 관광정보 조회를 가져올 수 없습니다."
+        return try {
+            val result = tourInfo.let { objectMapper.writeValueAsString(it) }
+            log.info("✅ [TOOL RESULT] getAreaBasedTourInfo - 결과: ${result.take(100)}...")
+            result
+        } catch (e: Exception) {
+            log.error("❌ [TOOL ERROR] getAreaBasedTourInfo - 예외 발생", e)
+            "지역기반 관광정보 조회를 가져올 수 없습니다."
+        }
     }
 
     /**
@@ -98,8 +106,14 @@ class TourTool(
         val locationBasedParams = TourLocationBasedParams(mapX, mapY, radius)
         val tourLocationBasedInfo = tourService.fetchLocationBasedTours(tourParams, locationBasedParams)
 
-        log.info("✅ [TOOL RESULT] getLocationBasedTourInfo - 결과: ${tourLocationBasedInfo.toString().take(100)}...")
-        return tourLocationBasedInfo.toString() ?: "위치기반 관광정보 조회를 가져올 수 없습니다."
+        return try {
+            val result = tourLocationBasedInfo.let { objectMapper.writeValueAsString(it) }
+            log.info("✅ [TOOL RESULT] getLocationBasedTourInfo - 결과: ${result.take(100)}...")
+            result
+        } catch (e: Exception) {
+            log.error("❌ [TOOL ERROR] getLocationBasedTourInfo - 예외 발생", e)
+            "위치기반 관광정보 조회를 가져올 수 없습니다."
+        }
     }
 
     /**
@@ -123,7 +137,13 @@ class TourTool(
         val tourDetailParams = TourDetailParams(contentId)
         val tourDetailInfo = tourService.fetchTourDetail(tourDetailParams)
 
-        log.info("✅ [TOOL RESULT] getTourDetailInfo - 결과: ${tourDetailInfo.toString().take(100)}...")
-        return tourDetailInfo.toString() ?: "관광정보 상세조회를 가져올 수 없습니다."
+        return try {
+            val result = tourDetailInfo.let { objectMapper.writeValueAsString(it) }
+            log.info("✅ [TOOL RESULT] getTourDetailInfo - 결과: ${result.take(100)}...")
+            result
+        } catch (e: Exception) {
+            log.error("❌ [TOOL ERROR] getTourDetailInfo - 예외 발생", e)
+            "관광정보 상세조회를 가져올 수 없습니다."
+        }
     }
 }
