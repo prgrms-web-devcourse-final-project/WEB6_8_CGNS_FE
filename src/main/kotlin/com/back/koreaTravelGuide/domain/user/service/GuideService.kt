@@ -49,4 +49,10 @@ class GuideService(
 
         return GuideResponse.from(userRepository.save(user))
     }
+
+    @Transactional(readOnly = true)
+    fun findGuidesByRegion(region: String): List<GuideResponse> {
+        val guides = userRepository.findByRoleAndLocationContains(UserRole.GUIDE, region)
+        return guides.map { GuideResponse.from(it) }
+    }
 }
