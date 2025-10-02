@@ -48,7 +48,7 @@ components:
         - role
       properties:
         role:
-          $ref: '#/components/schemas/UserRole'
+          $ref: "#/components/schemas/UserRole"
 
     LoginResponse:
       type: object
@@ -85,7 +85,7 @@ components:
           nullable: true
           description: 프로필 이미지 URL
         role:
-          $ref: '#/components/schemas/UserRole'
+          $ref: "#/components/schemas/UserRole"
         location:
           type: string
           nullable: true
@@ -119,7 +119,7 @@ components:
           format: uri
           nullable: true
         role:
-          $ref: '#/components/schemas/UserRole'
+          $ref: "#/components/schemas/UserRole"
 
     UserUpdateRequest:
       type: object
@@ -262,10 +262,10 @@ components:
           format: int64
           description: 평가 고유 식별자
         user:
-          $ref: '#/components/schemas/UserResponse'
+          $ref: "#/components/schemas/UserResponse"
           description: 평가를 남긴 사용자
         targetType:
-          $ref: '#/components/schemas/RateTargetType'
+          $ref: "#/components/schemas/RateTargetType"
         targetId:
           type: integer
           format: int64
@@ -325,7 +325,7 @@ components:
         ratings:
           type: array
           items:
-            $ref: '#/components/schemas/RateResponse'
+            $ref: "#/components/schemas/RateResponse"
 
   securitySchemes:
     BearerAuth:
@@ -353,20 +353,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRoleUpdateRequest'
+              $ref: "#/components/schemas/UserRoleUpdateRequest"
       responses:
-        '200':
+        "200":
           description: 역할 선택 및 로그인 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/LoginResponse'
-        '401':
+                        $ref: "#/components/schemas/LoginResponse"
+        "401":
           description: 인증 실패 (유효하지 않은 registerToken)
 
   /api/auth/logout:
@@ -378,12 +378,12 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: 로그아웃 성공
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
 
   /api/auth/refresh:
     post:
@@ -393,18 +393,18 @@ paths:
       description: 쿠키에 담긴 Refresh Token을 사용하여 만료된 Access Token을 재발급합니다.
       security: []
       responses:
-        '200':
+        "200":
           description: 토큰 재발급 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/AccessTokenResponse'
-        '401':
+                        $ref: "#/components/schemas/AccessTokenResponse"
+        "401":
           description: 유효하지 않은 Refresh Token
 
   # ===================
@@ -419,17 +419,17 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: 내 정보 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/UserResponse'
+                        $ref: "#/components/schemas/UserResponse"
     patch:
       tags:
         - users
@@ -442,19 +442,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdateRequest'
+              $ref: "#/components/schemas/UserUpdateRequest"
       responses:
-        '200':
+        "200":
           description: 프로필 수정 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/UserResponse'
+                        $ref: "#/components/schemas/UserResponse"
     delete:
       tags:
         - users
@@ -463,12 +463,12 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: 회원 탈퇴 성공
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
 
   # ===================
   # AI Chat Domain APIs
@@ -488,19 +488,19 @@ paths:
             format: int64
           description: 사용자 ID
       responses:
-        '200':
+        "200":
           description: 세션 목록 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/SessionsResponse'
+                          $ref: "#/components/schemas/SessionsResponse"
 
     post:
       tags:
@@ -516,17 +516,17 @@ paths:
             format: int64
           description: 사용자 ID
       responses:
-        '200':
+        "200":
           description: 세션 생성 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/SessionsResponse'
+                        $ref: "#/components/schemas/SessionsResponse"
 
   /api/aichat/sessions/{sessionId}:
     delete:
@@ -550,13 +550,13 @@ paths:
             format: int64
           description: 사용자 ID
       responses:
-        '200':
+        "200":
           description: 세션 삭제 완료
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '404':
+                $ref: "#/components/schemas/ApiResponse"
+        "404":
           description: 세션을 찾을 수 없음
 
   /api/aichat/sessions/{sessionId}/messages:
@@ -581,19 +581,19 @@ paths:
             format: int64
           description: 사용자 ID
       responses:
-        '200':
+        "200":
           description: 채팅 기록 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/SessionMessagesResponse'
+                          $ref: "#/components/schemas/SessionMessagesResponse"
 
     post:
       tags:
@@ -628,17 +628,17 @@ paths:
                   type: string
                   description: 사용자 메시지 내용
       responses:
-        '200':
+        "200":
           description: 메시지 전송 및 AI 응답 완료
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/AiChatResponse'
+                        $ref: "#/components/schemas/AiChatResponse"
 
   /api/aichat/sessions/{sessionId}/title:
     patch:
@@ -675,20 +675,20 @@ paths:
                   maxLength: 100
                   description: 새로운 세션 제목
       responses:
-        '200':
+        "200":
           description: 제목 수정 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/UpdateSessionTitleResponse'
-        '404':
+                        $ref: "#/components/schemas/UpdateSessionTitleResponse"
+        "404":
           description: 세션을 찾을 수 없음
-        '403':
+        "403":
           description: 권한 없음
 
   # ===================
@@ -720,13 +720,13 @@ paths:
             type: string
           description: "커서 기반 페이지네이션 포인터. '{updatedAt ISO-8601}|{roomId}' 형식이며 이전 응답의 nextCursor를 그대로 전달합니다."
       responses:
-        '200':
+        "200":
           description: 채팅방 목록 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
@@ -735,7 +735,7 @@ paths:
                           rooms:
                             type: array
                             items:
-                              $ref: '#/components/schemas/ChatRoomResponse'
+                              $ref: "#/components/schemas/ChatRoomResponse"
                           nextCursor:
                             type: string
                             nullable: true
@@ -754,20 +754,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatRoomStartRequest'
+              $ref: "#/components/schemas/ChatRoomStartRequest"
       responses:
-        '200':
+        "200":
           description: 채팅방 생성 또는 기존 방 반환
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ChatRoomResponse'
-        '403':
+                        $ref: "#/components/schemas/ChatRoomResponse"
+        "403":
           description: 인증되지 않은 사용자 또는 참여자가 아닙니다.
 
   /api/userchat/rooms/{roomId}:
@@ -787,20 +787,20 @@ paths:
             format: int64
           description: 채팅방 ID
       responses:
-        '200':
+        "200":
           description: 채팅방 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ChatRoomResponse'
-        '403':
+                        $ref: "#/components/schemas/ChatRoomResponse"
+        "403":
           description: 채팅방 참여자가 아닙니다.
-        '404':
+        "404":
           description: 채팅방을 찾을 수 없음
 
     delete:
@@ -819,15 +819,15 @@ paths:
             format: int64
           description: 채팅방 ID
       responses:
-        '200':
+        "200":
           description: 채팅방 삭제 완료
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '403':
+                $ref: "#/components/schemas/ApiResponse"
+        "403":
           description: 채팅방 생성자가 아닙니다.
-        '404':
+        "404":
           description: 채팅방을 찾을 수 없음
 
   /api/userchat/rooms/{roomId}/messages:
@@ -864,22 +864,22 @@ paths:
             maximum: 200
           description: 최대 조회 건수 (기본 50)
       responses:
-        '200':
+        "200":
           description: 메시지 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/ChatMessageResponse'
-        '403':
+                          $ref: "#/components/schemas/ChatMessageResponse"
+        "403":
           description: 채팅방 참여자가 아닙니다.
-        '404':
+        "404":
           description: 채팅방을 찾을 수 없음
 
     post:
@@ -902,22 +902,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatMessageSendRequest'
+              $ref: "#/components/schemas/ChatMessageSendRequest"
       responses:
-        '201':
+        "201":
           description: 메시지 전송 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ChatMessageResponse'
-        '403':
+                        $ref: "#/components/schemas/ChatMessageResponse"
+        "403":
           description: 채팅방 참여자가 아닙니다.
-        '404':
+        "404":
           description: 채팅방을 찾을 수 없음
 
   # ===================
@@ -944,19 +944,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RateRequest'
+              $ref: "#/components/schemas/RateRequest"
       responses:
-        '200':
+        "200":
           description: 평가 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/RateResponse'
+                        $ref: "#/components/schemas/RateResponse"
 
   /api/rate/aichat/sessions/{sessionId}:
     put:
@@ -979,19 +979,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RateRequest'
+              $ref: "#/components/schemas/RateRequest"
       responses:
-        '200':
+        "200":
           description: 평가 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/RateResponse'
+                        $ref: "#/components/schemas/RateResponse"
 
   /api/rate/guides/my:
     get:
@@ -1002,17 +1002,17 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: 내 평가 목록 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/GuideRatingSummaryResponse'
+                        $ref: "#/components/schemas/GuideRatingSummaryResponse"
 
   /api/rate/admin/aichat/sessions:
     get:
@@ -1039,20 +1039,17 @@ paths:
           name: sort
           schema:
             type: string
-            description: '정렬 기준 (예: createdAt,desc)'
+            description: "정렬 기준 (예: createdAt,desc)"
       responses:
-        '200':
+        "200":
           description: AI 채팅 평가 목록 조회 성공
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ApiResponse'
+                  - $ref: "#/components/schemas/ApiResponse"
                   - type: object
                     properties:
                       data:
                         type: object
                         description: Page<RateResponse> 형태
-
-
-

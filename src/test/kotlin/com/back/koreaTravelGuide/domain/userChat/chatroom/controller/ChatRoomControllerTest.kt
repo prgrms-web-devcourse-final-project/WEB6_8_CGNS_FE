@@ -9,6 +9,7 @@ import com.back.koreaTravelGuide.domain.userChat.chatroom.entity.ChatRoom
 import com.back.koreaTravelGuide.domain.userChat.chatroom.repository.ChatRoomRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -24,6 +25,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -85,6 +88,58 @@ class ChatRoomControllerTest {
                     userId = guest.id!!,
                 ),
             )
+    }
+
+    @Test
+    @DisplayName("listRooms returns paginated rooms with cursor")
+    fun listRoomsReturnsPaginatedRooms() {
+        val baseTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+        val extraRooms =
+            (1..6).map { idx ->
+                val extraGuide =
+                    userRepository.save(
+                        User(
+                            email = "guide$idx@test.com",
+                            nickname = "guide$idx",
+                            role = UserRole.GUIDE,
+                            oauthProvider = "test",
+                            oauthId = "guide$idx",
+                        ),
+                    )
+                chatRoomRepository.save(
+                    ChatRoom(
+                        title = "Guide-${extraGuide.id} · User-${guest.id}",
+                        guideId = extraGuide.id!!,
+                        userId = guest.id!!,
+                        updatedAt = baseTime.minusMinutes(idx.toLong()),
+                    ),
+                )
+            }
+
+        val firstPage =
+            mockMvc.perform(
+                get("/api/userchat/rooms")
+                    .header("Authorization", "Bearer $guestToken")
+                    .param("limit", "3"),
+            )
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.rooms.length()").value(3))
+                .andExpect(jsonPath("$.data.rooms[0].id").value(existingRoom.id!!.toInt()))
+                .andReturn()
+
+        val firstCursorNode = objectMapper.readTree(firstPage.response.contentAsString)["data"]["nextCursor"]
+        assertTrue(firstCursorNode != null && !firstCursorNode.isNull)
+        val firstCursor = firstCursorNode.asText()
+
+        mockMvc.perform(
+            get("/api/userchat/rooms")
+                .header("Authorization", "Bearer $guestToken")
+                .param("limit", "3")
+                .param("cursor", firstCursor),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.data.rooms.length()").value(3))
+            .andExpect(jsonPath("$.data.rooms[0].id").value(extraRooms[2].id!!.toInt()))
     }
 
     @Test
