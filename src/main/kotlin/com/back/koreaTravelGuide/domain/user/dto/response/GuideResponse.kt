@@ -1,6 +1,7 @@
 package com.back.koreaTravelGuide.domain.user.dto.response
 
 import com.back.koreaTravelGuide.domain.user.entity.User
+import com.back.koreaTravelGuide.domain.user.enums.Region
 import com.back.koreaTravelGuide.domain.user.enums.UserRole
 
 data class GuideResponse(
@@ -9,7 +10,7 @@ data class GuideResponse(
     val nickname: String,
     val profileImageUrl: String?,
     val role: UserRole,
-    val location: String?,
+    val location: Region?,
     val description: String?,
 ) {
     companion object {
