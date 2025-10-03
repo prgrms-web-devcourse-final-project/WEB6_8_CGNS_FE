@@ -23,7 +23,7 @@ on:
       - "Dockerfile"
     branches:
       - main
-
+      - feat/be/**
 permissions:
   contents: write # 태그/릴리즈
   packages: write # GHCR 푸시
