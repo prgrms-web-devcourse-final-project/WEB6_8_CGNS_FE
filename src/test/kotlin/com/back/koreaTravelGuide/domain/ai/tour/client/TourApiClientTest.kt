@@ -1,9 +1,10 @@
 package com.back.koreaTravelGuide.domain.ai.tour.client
-
 import com.back.koreaTravelGuide.KoreaTravelGuideApplication
+import com.back.koreaTravelGuide.config.TestConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles
  */
 @SpringBootTest(classes = [KoreaTravelGuideApplication::class])
 @ActiveProfiles("test")
+@Import(TestConfig::class)
 class TourApiClientTest {
     @Autowired
     private lateinit var tourApiClient: TourApiClient

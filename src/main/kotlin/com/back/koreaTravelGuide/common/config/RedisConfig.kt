@@ -6,12 +6,16 @@ import com.back.koreaTravelGuide.domain.ai.weather.dto.MidForecastDto
 import com.back.koreaTravelGuide.domain.ai.weather.dto.TemperatureAndLandForecastDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
@@ -20,6 +24,27 @@ import java.time.Duration
 
 @Configuration
 class RedisConfig {
+    @Value("\${spring.data.redis.host:localhost}")
+    private lateinit var redisHost: String
+
+    @Value("\${spring.data.redis.port:6379}")
+    private var redisPort: Int = 6379
+
+    @Value("\${spring.data.redis.password:}")
+    private var redisPassword: String = ""
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun redisConnectionFactory(): RedisConnectionFactory {
+        val redisConfiguration = RedisStandaloneConfiguration()
+        redisConfiguration.hostName = redisHost
+        redisConfiguration.port = redisPort
+        if (redisPassword.isNotEmpty()) {
+            redisConfiguration.setPassword(redisPassword)
+        }
+        return LettuceConnectionFactory(redisConfiguration)
+    }
+
     @Bean
     fun objectMapper(): ObjectMapper =
         ObjectMapper().apply {
@@ -47,7 +72,6 @@ class RedisConfig {
         connectionFactory: RedisConnectionFactory,
         objectMapper: ObjectMapper,
     ): CacheManager {
-
         // 각 캐시 타입별 Serializer 생성
         val tourResponseSerializer = Jackson2JsonRedisSerializer<TourResponse>(objectMapper, TourResponse::class.java)
         val tourDetailResponseSerializer = Jackson2JsonRedisSerializer<TourDetailResponse>(objectMapper, TourDetailResponse::class.java)
