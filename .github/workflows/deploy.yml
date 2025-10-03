@@ -61,14 +61,14 @@ jobs:
           draft: false
           prerelease: false
 
-    # ---------------------------------------------------------
-    # 2) 도커 이미지 빌드/푸시 (캐시 최대 활용)
-    # ---------------------------------------------------------
-    buildImageAndPush:
-      name: 도커 이미지 빌드와 푸시
-      needs: makeTagAndRelease
-      runs-on: ubuntu-latest
-      steps:
+  # ---------------------------------------------------------
+  # 2) 도커 이미지 빌드/푸시 (캐시 최대 활용)
+  # ---------------------------------------------------------
+  buildImageAndPush:
+    name: 도커 이미지 빌드와 푸시
+    needs: makeTagAndRelease
+    runs-on: ubuntu-latest
+    steps:
         - uses: actions/checkout@v4
 
         # 빌드 컨텍스트에 .env 생성 (비어있어도 실패하지 않게)
@@ -110,14 +110,14 @@ jobs:
               ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:${{ needs.makeTagAndRelease.outputs.tag_name }}
               ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_REPOSITORY }}:latest
 
-    # ---------------------------------------------------------
-    # 3) Blue/Green 무중단 배포 (EC2 + NPM 스위치)
-    # ---------------------------------------------------------
-    deploy:
-      name: Blue/Green 무중단 배포
-      runs-on: ubuntu-latest
-      needs: [ makeTagAndRelease, buildImageAndPush ]
-      steps:
+  # ---------------------------------------------------------
+  # 3) Blue/Green 무중단 배포 (EC2 + NPM 스위치)
+  # ---------------------------------------------------------
+  deploy:
+    name: Blue/Green 무중단 배포
+    runs-on: ubuntu-latest
+    needs: [ makeTagAndRelease, buildImageAndPush ]
+    steps:
         # AWS 자격 구성
         - uses: aws-actions/configure-aws-credentials@v4
           with:
