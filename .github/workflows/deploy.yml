@@ -227,6 +227,13 @@ jobs:
                 --restart unless-stopped \
                 --network "${NET}" \
                 -e TZ=Asia/Seoul \
+                -e SPRING_PROFILES_ACTIVE=prod \
+                -e SPRING__DATASOURCE__URL___DB_NAME="${APP_1_DB_NAME}" \
+                -e SPRING_DATASOURCE_USERNAME=team11 \
+                -e SPRING_DATASOURCE_PASSWORD="${PASSWORD_1}" \
+                -e REDIS_HOST=redis_1 \
+                -e REDIS_PORT=6379 \
+                -e REDIS_PASSWORD="${PASSWORD_1}" \
                 "${IMAGE}"
 
               # ---------------------------------------------------------
