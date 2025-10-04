@@ -31,6 +31,15 @@ spring:
     store-type: redis
     timeout: 30m
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 logging:
   level:
     root: INFO

@@ -61,6 +61,7 @@ class SecurityConfig(
                 authorize("/h2-console/**", permitAll)
                 authorize("/swagger-ui/**", "/v3/api-docs/**", permitAll)
                 authorize("/api/auth/**", permitAll)
+                authorize("/actuator/health", permitAll)
                 authorize("/favicon.ico", permitAll)
                 if (isDev) {
                     authorize(anyRequest, permitAll)
