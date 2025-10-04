@@ -54,8 +54,7 @@ spring:
 
   sql:
     init:
-      mode: always
-      schema-locations: classpath:org/springframework/ai/chat/memory/repository/jdbc/schema-h2.sql
+      mode: never  # prod에서는 Hibernate가 스키마 관리
 
   # WebSocket 설정 (Guest-Guide 채팅용)
   websocket:
