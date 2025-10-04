@@ -21,8 +21,9 @@ class SecurityConfig(
 ) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        val isDev = environment.getProperty("spring.profiles.active")?.contains("dev") == true ||
-                    environment.activeProfiles.contains("dev")
+        val isDev =
+            environment.getProperty("spring.profiles.active")?.contains("dev") == true ||
+                environment.activeProfiles.contains("dev")
 
         http {
             csrf { disable() }
@@ -60,6 +61,8 @@ class SecurityConfig(
                 authorize("/h2-console/**", permitAll)
                 authorize("/swagger-ui/**", "/v3/api-docs/**", permitAll)
                 authorize("/api/auth/**", permitAll)
+                authorize("/actuator/health", permitAll)
+                authorize("/weather/test1", permitAll)
                 authorize("/favicon.ico", permitAll)
                 if (isDev) {
                     authorize(anyRequest, permitAll)

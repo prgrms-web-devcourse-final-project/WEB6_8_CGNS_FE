@@ -1,6 +1,16 @@
+# 서버 설정 (개발용)
+server:
+  port: 8080
+  error:
+    include-stacktrace: always # 에러 스택트레이스 포함 (개발용)
+
 spring:
   profiles:
-    active: dev
+    default: dev
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration # Redis 없어도 실행 가능하도록 변경
+      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration # Redis 없어도 실행 가능하도록 변경
   config:
     import: 
       - "optional:file:.env[.properties]"
@@ -36,12 +46,15 @@ spring:
     show-sql: true # SQL 로그 출력 (디버깅용)
     properties:
       hibernate:
-        format_sql: true # SQL 포맷팅
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
+      open-in-view: false
 
   sql:
     init:
-      mode: always
-      schema-locations: classpath:org/springframework/ai/chat/memory/repository/jdbc/schema-h2.sql
+      mode: never  # prod에서는 Hibernate가 스키마 관리
 
   # WebSocket 설정 (Guest-Guide 채팅용)
   websocket:
@@ -73,9 +86,9 @@ spring:
     store-type: none  # Redis 없어도 실행 가능하도록 변경
     timeout: 30m
   # Redis 자동 설정 비활성화 (세션 비활성화용)
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+#  autoconfigure: #이거 설정하면 운영 환경에서 레디스 세션 작동 안됨
+#    exclude:
+#      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 
   security:
     oauth2:
@@ -130,7 +143,7 @@ springdoc:
 # Weather API 설정
 weather:
   api:
-    key: ${WEATHER_API_KEY}
+    key: ${WEATHER__API__KEY}
     base-url: https://apihub.kma.go.kr/api/typ02/openApi/MidFcstInfoService
 
 # Tour API 설정
@@ -153,12 +166,6 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
-# 서버 설정 (개발용)
-server:
-  port: 8080
-  error:
-    include-stacktrace: always # 에러 스택트레이스 포함 (개발용)
-
 # 관리 엔드포인트 (개발/디버깅용)
 management:
   endpoints:
@@ -167,7 +174,24 @@ management:
         include: health,info,metrics,env,beans
   endpoint:
     health:
-      show-details: always
+      probes:
+        enabled: true
+      show-details: never
+
+custom:
+  dev:
+    cookieDomain: localhost
+    frontUrl: "http://${custom.dev.cookieDomain}:3000"
+    backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
+  prod:
+    cookieDomain: team11.giwon11292.com
+    frontUrl: "https://www.${custom.prod.cookieDomain}"
+    backUrl: "https://api.${custom.prod.cookieDomain}"
+  site:
+    cookieDomain: "${custom.dev.cookieDomain}"
+    frontUrl: "${custom.dev.frontUrl}"
+    backUrl: "${custom.dev.backUrl}"
+    name: team11
 
 # JWT 설정
 jwt:

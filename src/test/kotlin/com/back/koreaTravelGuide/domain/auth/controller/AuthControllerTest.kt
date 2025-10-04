@@ -1,6 +1,6 @@
 package com.back.koreaTravelGuide.domain.auth.controller
-
 import com.back.koreaTravelGuide.common.security.JwtTokenProvider
+import com.back.koreaTravelGuide.config.TestConfig
 import com.back.koreaTravelGuide.domain.user.entity.User
 import com.back.koreaTravelGuide.domain.user.enums.UserRole
 import com.back.koreaTravelGuide.domain.user.repository.UserRepository
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@Import(TestConfig::class)
 class AuthControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc

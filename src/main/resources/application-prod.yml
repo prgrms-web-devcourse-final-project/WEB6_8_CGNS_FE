@@ -1,7 +1,9 @@
 spring:
+  autoconfigure:
+    exclude:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
+    url: jdbc:postgresql://postgresql_1:5432/${SPRING__DATASOURCE__URL___DB_NAME}
+    username: ${SPRING_DATASOURCE_USERNAME} # local용 근접 접근 계정
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
@@ -13,6 +15,31 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  ai:
+    vectorstore:
+      jdbc:
+        initialize-schema: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+  session:
+    store-type: redis
+    timeout: 30m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 logging:
   level:
     root: INFO
@@ -23,4 +50,9 @@ logging:
   pattern:
     console: "[%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{36} - %msg%n"
 
-#나중에 개발 환경 레디스 설정 추가
+custom:
+  site:
+    cookieDomain: "${custom.prod.cookieDomain}"
+    frontUrl: "${custom.prod.frontUrl}"
+    backUrl: "${custom.prod.backUrl}"
+    name: team11

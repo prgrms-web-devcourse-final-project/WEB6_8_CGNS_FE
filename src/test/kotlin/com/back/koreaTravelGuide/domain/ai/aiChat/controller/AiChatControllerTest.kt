@@ -1,5 +1,5 @@
 package com.back.koreaTravelGuide.domain.ai.aiChat.controller
-
+import com.back.koreaTravelGuide.config.TestConfig
 import com.back.koreaTravelGuide.domain.ai.aiChat.dto.AiChatRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.cdimascio.dotenv.dotenv
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
+@Import(TestConfig::class)
 class AiChatControllerTest {
     companion object {
         @JvmStatic
