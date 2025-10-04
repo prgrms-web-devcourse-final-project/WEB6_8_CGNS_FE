@@ -2,6 +2,7 @@ package com.back.koreaTravelGuide.domain.guide.service
 
 import com.back.koreaTravelGuide.domain.user.dto.request.GuideUpdateRequest
 import com.back.koreaTravelGuide.domain.user.dto.response.GuideResponse
+import com.back.koreaTravelGuide.domain.user.enums.Region
 import com.back.koreaTravelGuide.domain.user.enums.UserRole
 import com.back.koreaTravelGuide.domain.user.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -50,9 +51,12 @@ class GuideService(
         return GuideResponse.from(userRepository.save(user))
     }
 
+    // 김지원: 10월 4일 임시 수정 - upstream merge 후 Region enum 타입 불일치 해결
+    // String -> Region enum 변환 추가
     @Transactional(readOnly = true)
     fun findGuidesByRegion(region: String): List<GuideResponse> {
-        val guides = userRepository.findByRoleAndLocationContains(UserRole.GUIDE, region)
+        val regionEnum = Region.valueOf(region.uppercase())
+        val guides = userRepository.findByRoleAndLocation(UserRole.GUIDE, regionEnum)
         return guides.map { GuideResponse.from(it) }
     }
 }
